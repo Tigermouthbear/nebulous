@@ -20,11 +20,6 @@ public abstract class Modifier
 
 	public abstract void modify();
 
-	protected Map<String, ClassNode> getClassMap()
-	{
-		return target.getClassNodes();
-	}
-
 	protected void applyRemap(Map<String, String> remap)
 	{
 		SimpleRemapper remapper = new SimpleRemapper(remap);
@@ -33,7 +28,46 @@ public abstract class Modifier
 			ClassNode copy = new ClassNode();
 			ClassRemapper adapter = new ClassRemapper(copy, remapper);
 			node.accept(adapter);
+
+			getClassMap().remove(node.name);
 			getClassMap().put(node.name, copy);
 		}
+	}
+
+	protected boolean isDependency(String name)
+	{
+		String path = getPath(name);
+
+		for(String depencency: target.getDependencies())
+		{
+			if(path.contains(depencency)) return true;
+		}
+
+		return false;
+	}
+
+	protected String getPath(String name)
+	{
+		if(!name.contains("/")) return "";
+
+		String reversedString = reverseString(name);
+		String path = reversedString.substring(reversedString.indexOf("/"));
+		return reverseString(path);
+	}
+
+	private String reverseString(String string)
+	{
+		StringBuilder sb = new StringBuilder();
+		char[] chars = string.toCharArray();
+
+		for(int i = chars.length - 1; i >= 0; i--)
+			sb.append(chars[i]);
+
+		return sb.toString();
+	}
+
+	protected Map<String, ClassNode> getClassMap()
+	{
+		return target.getClassNodes();
 	}
 }

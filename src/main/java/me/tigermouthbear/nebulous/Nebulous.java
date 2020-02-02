@@ -1,17 +1,16 @@
 package me.tigermouthbear.nebulous;
 
+import me.tigermouthbear.nebulous.config.ArrayConfig;
+import me.tigermouthbear.nebulous.config.Config;
+import me.tigermouthbear.nebulous.config.ConfigReader;
 import me.tigermouthbear.nebulous.modifiers.Modifier;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 
 import java.io.*;
-import java.net.URI;
 import java.nio.file.*;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -21,8 +20,14 @@ public class Nebulous
 	private Map<String, byte[]> files = new HashMap<>();
 	private Map<String, ClassNode> classNodes = new HashMap<>();
 
-	public Nebulous(String file)
+	private ArrayConfig dependencies = new ArrayConfig("dependencies");
+
+	public Nebulous(String file, File config)
 	{
+		ConfigReader.read(config);
+
+		System.out.println(getDependencies().toString());
+
 		try
 		{
 			setJar(new JarFile(file));
@@ -105,8 +110,17 @@ public class Nebulous
 	{
 		return files;
 	}
+
 	public Map<String, ClassNode> getClassNodes()
 	{
 		return classNodes;
+	}
+
+	public List<String> getDependencies()
+	{
+		List<String> temp = new ArrayList<>();
+		for(int i = 0; i < dependencies.getValue().length(); i++)
+			temp.add(dependencies.getValue().getString(i));
+		return temp;
 	}
 }

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ClassNameModifier extends Modifier
 {
@@ -17,29 +18,11 @@ public class ClassNameModifier extends Modifier
 	{
 		Map<String, String> remap = new HashMap<>();
 
-		for(ClassNode cn: getClassMap().values())
-		{
-			if(!Arrays.asList(cn.name.split("/")).contains("Main")) remap.put(cn.name, getPath(cn.name) + RandomString.genRandomString());
-		}
+		getClassMap().values().stream().filter(classNode ->
+				!isDependency(classNode.name) &&
+						!Arrays.asList(classNode.name.split("/")).contains("Main")).forEach(classNode ->
+				remap.put(classNode.name, getPath(classNode.name) + RandomString.genRandomString()));
 
 		applyRemap(remap);
-	}
-
-	public String getPath(String name)
-	{
-		String reversedString = reverseString(name);
-		String path = reversedString.substring(reversedString.indexOf("/"));
-		return reverseString(path);
-	}
-
-	private String reverseString(String string)
-	{
-		StringBuilder sb = new StringBuilder();
-		char[] chars = string.toCharArray();
-
-		for(int i = chars.length - 1; i >= 0; i--)
-			sb.append(chars[i]);
-
-		return sb.toString();
 	}
 }

@@ -28,9 +28,12 @@ build.dependsOn.add("shadowJar")
 
 repositories {
     mavenCentral()
+    maven { url "http://oss.sonatype.org/content/groups/public/" }
 }
 
 dependencies {
+    compile 'org.json:json:20190722'
+
     compile 'org.ow2.asm:asm:7.3.1'
     compile 'org.ow2.asm:asm-tree:7.3.1'
     compile 'org.ow2.asm:asm-commons:7.3.1'
