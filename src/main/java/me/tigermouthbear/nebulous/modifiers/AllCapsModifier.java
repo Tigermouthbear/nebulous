@@ -7,11 +7,11 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
-public class AllCapsModifier implements Modifier
+public class AllCapsModifier extends Modifier
 {
-	public void modify(Nebulous target)
+	public void modify()
 	{
-		for(ClassNode cn: target.getClassNodes().values())
+		for(ClassNode cn: getClassMap().values())
 		{
 			for(MethodNode mn: cn.methods)
 			{

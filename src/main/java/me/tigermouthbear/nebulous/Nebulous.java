@@ -1,5 +1,6 @@
 package me.tigermouthbear.nebulous;
 
+import me.tigermouthbear.nebulous.modifiers.Modifier;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
@@ -27,6 +28,18 @@ public class Nebulous
 			setJar(new JarFile(file));
 		}
 		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public void apply(Class<? extends Modifier> modifier)
+	{
+		try
+		{
+			modifier.newInstance().setTarget(this).modify();
+		}
+		catch(InstantiationException | IllegalAccessException e)
 		{
 			e.printStackTrace();
 		}
