@@ -1,6 +1,5 @@
 package me.tigermouthbear.nebulous.modifiers;
 
-import me.tigermouthbear.nebulous.Nebulous;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;

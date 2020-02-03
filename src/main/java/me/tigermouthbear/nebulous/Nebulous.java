@@ -1,15 +1,21 @@
 package me.tigermouthbear.nebulous;
 
 import me.tigermouthbear.nebulous.config.ArrayConfig;
-import me.tigermouthbear.nebulous.config.Config;
 import me.tigermouthbear.nebulous.config.ConfigReader;
+import me.tigermouthbear.nebulous.config.StringConfig;
 import me.tigermouthbear.nebulous.modifiers.Modifier;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 
-import java.io.*;
-import java.nio.file.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -17,20 +23,20 @@ import java.util.jar.JarOutputStream;
 
 public class Nebulous
 {
+	private static StringConfig input = new StringConfig("input");
+	private static StringConfig output = new StringConfig("output");
+	private static ArrayConfig dependencies = new ArrayConfig("dependencies");
+
 	private Map<String, byte[]> files = new HashMap<>();
 	private Map<String, ClassNode> classNodes = new HashMap<>();
 
-	private ArrayConfig dependencies = new ArrayConfig("dependencies");
-
-	public Nebulous(String file, File config)
+	public Nebulous(File config)
 	{
 		ConfigReader.read(config);
 
-		System.out.println(getDependencies().toString());
-
 		try
 		{
-			setJar(new JarFile(file));
+			setJar(new JarFile(input.getValue()));
 		}
 		catch(IOException e)
 		{
@@ -76,11 +82,13 @@ public class Nebulous
 		}
 	}
 
-	public void saveJar(String jarLocation) throws IOException
+	public void saveJar() throws IOException
 	{
-		if(!jarLocation.endsWith(".jar")) jarLocation += ".jar";
+		String loc = output.getValue();
 
-		Path jarPath = Paths.get(jarLocation);
+		if(!loc.endsWith(".jar")) loc += ".jar";
+
+		Path jarPath = Paths.get(loc);
 		Files.deleteIfExists(jarPath);
 		JarOutputStream outJar = new JarOutputStream(Files.newOutputStream(jarPath, new StandardOpenOption[] {StandardOpenOption.CREATE, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE}));
 

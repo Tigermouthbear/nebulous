@@ -2,7 +2,8 @@ package me.tigermouthbear.nebulous.modifiers;
 
 import me.tigermouthbear.nebulous.util.RandomString;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FieldNameModifier extends Modifier
 {

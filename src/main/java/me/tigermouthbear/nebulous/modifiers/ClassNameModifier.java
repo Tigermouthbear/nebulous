@@ -1,16 +1,10 @@
 package me.tigermouthbear.nebulous.modifiers;
 
 import me.tigermouthbear.nebulous.util.RandomString;
-import org.objectweb.asm.commons.ClassRemapper;
-import org.objectweb.asm.commons.SimpleRemapper;
-import me.tigermouthbear.nebulous.Nebulous;
-import org.objectweb.asm.tree.ClassNode;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ClassNameModifier extends Modifier
 {
