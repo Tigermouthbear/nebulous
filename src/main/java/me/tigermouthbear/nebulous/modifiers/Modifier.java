@@ -6,7 +6,10 @@ import org.objectweb.asm.commons.SimpleRemapper;
 import org.objectweb.asm.tree.ClassNode;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class Modifier
 {
@@ -32,6 +35,16 @@ public abstract class Modifier
 			getClassMap().remove(node.name);
 			getClassMap().put(node.name, copy);
 		}
+	}
+
+	protected Stream<ClassNode> getClasses()
+	{
+		return getClassMap().values().stream().filter(classNode -> !isDependency(classNode.name));
+	}
+
+	protected List<ClassNode> getImplementations(ClassNode classNode)
+	{
+		return getClasses().collect(Collectors.toList()).stream().filter(cn -> cn.interfaces.contains(classNode.name)).collect(Collectors.toList());
 	}
 
 	protected boolean isDependency(String name)

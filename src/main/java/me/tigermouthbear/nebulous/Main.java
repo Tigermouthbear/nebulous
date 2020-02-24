@@ -1,8 +1,6 @@
 package me.tigermouthbear.nebulous;
 
-import me.tigermouthbear.nebulous.modifiers.ClassNameModifier;
-import me.tigermouthbear.nebulous.modifiers.FieldNameModifier;
-import me.tigermouthbear.nebulous.modifiers.MethodNameModifier;
+import me.tigermouthbear.nebulous.modifiers.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +20,7 @@ public class Main
 		//Run modifiers
 		//nebulous.apply(AllCapsModifier.class);
 		nebulous.apply(FieldNameModifier.class);
-		nebulous.apply(MethodNameModifier.class);
+		//nebulous.apply(MethodNameModifier.class);
 		nebulous.apply(ClassNameModifier.class);
 
 		nebulous.saveJar();

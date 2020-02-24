@@ -9,16 +9,17 @@ public class RandomString
 	private static final int MAXLENGTH = 15;
 	private static final int MINLENGTH = 5;
 
-	private static final String[] OSET = new String[] {"o", "c", "O", "C"};
+	private static final String[] CSET = new String[] {"o", "c"};
+	private static final String[] OSET = new String[] {"O", "C"};
 	private static final String[] LSET = new String[] {"l", "i"};
-	private static final String[][] SETS = new String[][] {OSET, LSET};
+	private static final String[][] SETS = new String[][] {OSET, LSET, CSET};
 
 	private static ArrayList<String> stringsUsed = new ArrayList<>();
 
 
 	public static String genRandomString()
 	{
-		String[] set = SETS[RANDOM.nextInt(2)];
+		String[] set = SETS[RANDOM.nextInt(SETS.length)];
 
 		int length = RANDOM.nextInt(MAXLENGTH - MINLENGTH) + MINLENGTH;
 
