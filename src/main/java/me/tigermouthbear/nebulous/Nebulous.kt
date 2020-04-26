@@ -8,6 +8,7 @@ import me.tigermouthbear.nebulous.modifiers.renaming.FieldNameModifier
 import me.tigermouthbear.nebulous.modifiers.Modifier
 import me.tigermouthbear.nebulous.modifiers.constants.StringByteEncryptionModifier
 import me.tigermouthbear.nebulous.modifiers.constants.StringEncryptionModifier
+import me.tigermouthbear.nebulous.modifiers.renaming.MethodNameModifier
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
@@ -32,8 +33,8 @@ object Nebulous {
 	private val output = StringConfig("output")
 	private val dependencies = ArrayConfig("dependencies")
 
-    private val files: MutableMap<String, ByteArray> = HashMap()
-    private val classNodes: MutableMap<String, ClassNode> = HashMap()
+	private val files: MutableMap<String, ByteArray> = HashMap()
+	private val classNodes: MutableMap<String, ClassNode> = HashMap()
 	private lateinit var manifest: Manifest
 
 	fun run(config: File) {
@@ -42,7 +43,7 @@ object Nebulous {
 		openJar(JarFile(input.value))
 
 		//val modifiers: List<Modifier> = arrayListOf(FieldNameModifier(), ClassNameModifier())
-		val modifiers: List<Modifier> = arrayListOf(StringEncryptionModifier(), StringByteEncryptionModifier(), FieldNameModifier(), ClassNameModifier())
+		val modifiers: List<Modifier> = arrayListOf(StringEncryptionModifier(), StringByteEncryptionModifier(), FieldNameModifier(), MethodNameModifier(), ClassNameModifier())
 
 		modifiers.forEach { modifier -> modifier.modify() }
 
