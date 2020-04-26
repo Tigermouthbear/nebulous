@@ -6,18 +6,13 @@ import org.json.JSONTokener;
 import java.io.File;
 import java.io.FileInputStream;
 
-public class ConfigReader
-{
-	public static void read(File file)
-	{
-		try
-		{
+public class ConfigReader {
+	public static void read(File file) {
+		try {
 			JSONObject jsonObject = new JSONObject(new JSONTokener(new FileInputStream(file)));
 
-			for(Config config: Config.getAll())
-			{
-				switch(config.getType())
-				{
+			for(Config config: Config.getAll()) {
+				switch(config.getType()) {
 					case STRING:
 						config.setValue(jsonObject.getString(config.getName()));
 						break;
@@ -27,9 +22,7 @@ public class ConfigReader
 						break;
 				}
 			}
-		}
-		catch(Exception e)
-		{
+		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
