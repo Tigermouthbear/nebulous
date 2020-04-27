@@ -7,15 +7,14 @@ import org.objectweb.asm.tree.ClassNode
 
 /**
  * @author Tigermouthbear
+ * Removes debug info such as sourcefile
  */
 
 class DebugInfoRemover: IModifier {
 	override fun modify() {
 		val map: MutableMap<String, ClassNode> = mutableMapOf()
 
-		classes.stream()
-		.filter { cn -> !isDependency(cn.name) }
-		.forEach { cn ->
+		classes.forEach { cn ->
 			val cw = ClassWriter(ClassWriter.COMPUTE_MAXS)
 			cn.accept(cw)
 			val clone = ClassNode()
@@ -25,5 +24,10 @@ class DebugInfoRemover: IModifier {
 
 		classMap.clear()
 		classMap.putAll(map)
+	}
+
+
+	override fun getName(): String {
+		return "Debug Info Remover"
 	}
 }

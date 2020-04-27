@@ -2,31 +2,26 @@ package me.tigermouthbear.nebulous.modifiers.renamers
 
 import me.tigermouthbear.nebulous.modifiers.IModifier
 import me.tigermouthbear.nebulous.util.Dictionary
-import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.ClassNode
-import org.objectweb.asm.tree.MethodNode
+import org.objectweb.asm.tree.FieldNode
 import java.util.*
 
 /**
  * @author Tigermouthbear
+ * Renames all fields to use the current dictionary
  */
 
-class MethodNameRenamer: IModifier {
-	private val blacklist = arrayListOf("main", "createUI")
-
+class FieldRenamer: IModifier {
 	override fun modify() {
 		val remap: MutableMap<String?, String?> = mutableMapOf()
-		val methodMap: MutableMap<MethodNode, ClassNode> = mutableMapOf()
+		val fieldMap: MutableMap<FieldNode, ClassNode> = mutableMapOf()
 
 		classes.stream()
-				.filter { cn -> !isDependency(cn.name) }
-				.forEach { cn ->
-					cn.methods.stream()
-						.filter { mn -> !blacklist.contains(mn.name) && !mn.name.startsWith("<") && mn.access and ACC_NATIVE == 0 }
-						.forEach { mn -> methodMap[mn] = cn }
-				}
+		.filter { cn -> !isDependency(cn.name) }
+		.forEach { cn -> cn.fields
+		.forEach { fn -> fieldMap[fn] = cn } }
 
-		for((mn, owner) in methodMap.entries) {
+		for((fn, owner) in fieldMap.entries) {
 			val name = Dictionary.getNewName()
 
 			val stack = Stack<ClassNode?>()
@@ -34,7 +29,7 @@ class MethodNameRenamer: IModifier {
 
 			while(!stack.empty()) {
 				val cn = stack.pop()
-				remap[cn!!.name + "." + mn.name + mn.desc] = name
+				remap[cn!!.name + "." + fn.name] = name
 
 				//add classes which implement or extend the class node to the stack so that their fields get remapped
 				stack.addAll(getExtensions(cn))
@@ -43,5 +38,9 @@ class MethodNameRenamer: IModifier {
 		}
 
 		applyRemap(remap)
+	}
+
+	override fun getName(): String {
+		return "Field Renamer"
 	}
 }

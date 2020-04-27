@@ -6,9 +6,10 @@ import java.util.*
 
 /**
  * @author Tigermouthbear
+ * Renames all classes to use the current dictionary
  */
 
-class ClassNameRenamer: IModifier {
+class ClassRenamer: IModifier {
 	override fun modify() {
 		val remap: MutableMap<String?, String?> = HashMap()
 
@@ -22,5 +23,9 @@ class ClassNameRenamer: IModifier {
 		}
 
 		applyRemap(remap)
+	}
+
+	override fun getName(): String {
+		return "Class Renamer"
 	}
 }

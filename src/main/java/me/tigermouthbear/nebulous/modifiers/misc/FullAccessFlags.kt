@@ -5,6 +5,7 @@ import org.objectweb.asm.Opcodes.*
 
 /**
  * @author Tigermouthbear
+ * Sets all nodes to have full access flags
  */
 
 class FullAccessFlags: IModifier {
@@ -43,5 +44,9 @@ class FullAccessFlags: IModifier {
 		if(access and ACC_VARARGS !== 0) a = a or ACC_VARARGS
 		if(access and ACC_VOLATILE !== 0) a = a or ACC_VOLATILE
 		return a
+	}
+
+	override fun getName(): String {
+		return "Full Access Flags"
 	}
 }

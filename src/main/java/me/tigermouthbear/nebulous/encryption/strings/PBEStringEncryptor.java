@@ -1,4 +1,4 @@
-package me.tigermouthbear.nebulous.modifiers.encryption;
+package me.tigermouthbear.nebulous.encryption.strings;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -14,7 +14,7 @@ import java.util.Base64;
  * @author Tigermouthbear
  */
 
-public class PBEEncryptor implements IEncryptor {
+public class PBEStringEncryptor implements IStringEncryptor {
 	public String getName() {
 		return "PBEEncryptor";
 	}

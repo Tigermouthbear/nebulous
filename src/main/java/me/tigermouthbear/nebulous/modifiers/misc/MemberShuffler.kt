@@ -5,6 +5,7 @@ import java.util.*
 
 /**
  * @author Tigermouthbear
+ * Shuffles the order of all nodes
  */
 
 class MemberShuffler: IModifier {
@@ -52,5 +53,10 @@ class MemberShuffler: IModifier {
 
 	private fun shuffle(list: List<*>?) {
 		if(list != null) Collections.shuffle(list)
+	}
+
+
+	override fun getName(): String {
+		return "Member Shuffler"
 	}
 }

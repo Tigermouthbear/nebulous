@@ -3,15 +3,17 @@ package me.tigermouthbear.nebulous
 import me.tigermouthbear.nebulous.config.ArrayConfig
 import me.tigermouthbear.nebulous.config.ConfigReader
 import me.tigermouthbear.nebulous.config.StringConfig
-import me.tigermouthbear.nebulous.modifiers.renamers.ClassNameRenamer
-import me.tigermouthbear.nebulous.modifiers.renamers.FieldNameRenamer
 import me.tigermouthbear.nebulous.modifiers.IModifier
-import me.tigermouthbear.nebulous.modifiers.constants.StringSplitter
 import me.tigermouthbear.nebulous.modifiers.constants.StringEncryptor
+import me.tigermouthbear.nebulous.modifiers.constants.StringPooler
+import me.tigermouthbear.nebulous.modifiers.constants.StringSplitter
 import me.tigermouthbear.nebulous.modifiers.misc.DebugInfoRemover
 import me.tigermouthbear.nebulous.modifiers.misc.FullAccessFlags
 import me.tigermouthbear.nebulous.modifiers.misc.MemberShuffler
-import me.tigermouthbear.nebulous.modifiers.renamers.MethodNameRenamer
+import me.tigermouthbear.nebulous.modifiers.optimizers.NOPRemover
+import me.tigermouthbear.nebulous.modifiers.renamers.ClassRenamer
+import me.tigermouthbear.nebulous.modifiers.renamers.FieldRenamer
+import me.tigermouthbear.nebulous.modifiers.renamers.MethodRenamer
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
@@ -41,27 +43,35 @@ object Nebulous {
 	private lateinit var manifest: Manifest
 
 	fun run(config: File) {
+		val startTime = System.currentTimeMillis()
+
 		ConfigReader.read(config)
 
 		openJar(JarFile(input.value))
 
 		val modifiers: List<IModifier> =
 		arrayListOf(
+				StringPooler(),
 				StringEncryptor(),
 				StringSplitter(),
-				FieldNameRenamer(),
-				MethodNameRenamer(),
-				ClassNameRenamer(),
+				FieldRenamer(),
+				//MethodRenamer(),
+				ClassRenamer(),
 				MemberShuffler(),
 				FullAccessFlags(),
-				DebugInfoRemover()
+				DebugInfoRemover(),
+				NOPRemover()
 		)
 
-		modifiers.forEach { modifier -> modifier.modify() }
+		modifiers.forEach { modifier ->
+			val current = System.currentTimeMillis()
+			modifier.modify()
+			println(modifier.getName() + " completed in " + (System.currentTimeMillis() - current) + " milliseconds")
+		}
 
 		saveJar()
 
-		println("Finished!")
+		println("\nNebulous finished in " + (System.currentTimeMillis() - startTime) + " milliseconds")
 	}
 
 	private fun openJar(jar: JarFile) {

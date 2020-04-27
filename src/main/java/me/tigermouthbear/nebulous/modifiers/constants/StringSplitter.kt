@@ -6,6 +6,7 @@ import org.objectweb.asm.tree.*
 
 /**
  * @author Tigermouthbear
+ * Splits all string ldcs into their given byte arrays
  */
 
 class StringSplitter: IModifier {
@@ -14,26 +15,26 @@ class StringSplitter: IModifier {
 		.filter { cn -> !isDependency(cn.name) }
 		.forEach { cn ->
 			cn.methods.forEach { mn ->
-				val strings: MutableList<AbstractInsnNode> = mutableListOf()
+				val strings: MutableList<LdcInsnNode> = mutableListOf()
 
 				mn.instructions.forEach { ain ->
 					if(ain is LdcInsnNode && ain.cst is String) strings.add(ain)
 				}
 
-				strings.forEach { ain ->
-					mn.instructions.insert(ain, encrypt(ain))
-					mn.instructions.remove(ain)
+				strings.forEach { ldc ->
+					mn.instructions.insert(ldc, encrypt(ldc))
+					mn.instructions.remove(ldc)
 				}
 			}
 		}
 	}
 
-	private fun encrypt(ain: AbstractInsnNode): InsnList {
+	private fun encrypt(ldc: LdcInsnNode): InsnList {
 		return InsnList().apply {
 			add(TypeInsnNode(NEW, "java/lang/String"))
 			add(InsnNode(DUP))
 
-			val bytes = ((ain as LdcInsnNode).cst as String).toByteArray()
+			val bytes = (ldc.cst as String).toByteArray()
 
 			add(getLdcInt(bytes.size)) // set array length
 			add(IntInsnNode(NEWARRAY, T_BYTE)) // create array
@@ -53,5 +54,9 @@ class StringSplitter: IModifier {
 					"([B)V",
 					false))
 		}
+	}
+
+	override fun getName(): String {
+		return "String Splitter"
 	}
 }

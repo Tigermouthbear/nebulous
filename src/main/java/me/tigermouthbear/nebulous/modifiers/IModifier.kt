@@ -5,6 +5,7 @@ import me.tigermouthbear.nebulous.util.Utils
 import org.objectweb.asm.commons.ClassRemapper
 import org.objectweb.asm.commons.SimpleRemapper
 import org.objectweb.asm.tree.ClassNode
+import org.objectweb.asm.tree.MethodNode
 import java.util.jar.Manifest
 import java.util.stream.Collectors
 
@@ -26,6 +27,8 @@ interface IModifier: Utils {
 		get() = Nebulous.getManifest()
 
 	fun modify()
+
+	fun getName(): String
 
 	fun applyRemap(remap: Map<String?, String?>?) {
 		val remapper = SimpleRemapper(remap)
@@ -75,5 +78,13 @@ interface IModifier: Utils {
 		val chars = string.toCharArray()
 		for(i in chars.indices.reversed()) sb.append(chars[i])
 		return sb.toString()
+	}
+
+	fun getMethod(cn: ClassNode, method: String): MethodNode? {
+		cn.methods.forEach { mn ->
+			if(mn.name == method) return mn
+		}
+
+		return null
 	}
 }

@@ -2,8 +2,8 @@ package me.tigermouthbear.nebulous.modifiers.constants
 
 import me.tigermouthbear.nebulous.Nebulous
 import me.tigermouthbear.nebulous.modifiers.IModifier
-import me.tigermouthbear.nebulous.modifiers.encryption.IEncryptor
-import me.tigermouthbear.nebulous.modifiers.encryption.PBEEncryptor
+import me.tigermouthbear.nebulous.encryption.strings.IStringEncryptor
+import me.tigermouthbear.nebulous.encryption.strings.PBEStringEncryptor
 import me.tigermouthbear.nebulous.util.Dictionary
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Opcodes.*
@@ -11,10 +11,11 @@ import org.objectweb.asm.tree.*
 
 /**
  * @author Tigermouthbear
+ * Encrypts all string ldcs with a custom cipher
  */
 
 class StringEncryptor: IModifier {
-	private val encryptor = PBEEncryptor()
+	private val encryptor = PBEStringEncryptor()
 
 	override fun modify() {
 		val encryptedStrings: MutableList<EncryptedString> = mutableListOf()
@@ -44,14 +45,11 @@ class StringEncryptor: IModifier {
 				classReader.accept(enc, 0)
 
 				// read decryptor method in class
-				var method: MethodNode? = null
-				enc.methods.forEach { mn ->
-					if(mn.name == "decrypt") method = mn
-				}
+				val method: MethodNode? = getMethod(enc, "decrypt")
 
 				// set method name to the name of the encryptor
 				method!!.access = ACC_PRIVATE or ACC_STATIC
-				method!!.name = encryptor.name
+				method.name = encryptor.name
 
 				// add decryptor to the class
 				cn.methods.add(method)
@@ -80,5 +78,9 @@ class StringEncryptor: IModifier {
 		}
 	}
 
-	class EncryptedString(val cn: ClassNode, val mn: MethodNode, val ldc: LdcInsnNode, val encryptor: IEncryptor, val key: String)
+	class EncryptedString(val cn: ClassNode, val mn: MethodNode, val ldc: LdcInsnNode, val encryptor: IStringEncryptor, val key: String)
+
+	override fun getName(): String {
+		return "String Encryptor"
+	}
 }
