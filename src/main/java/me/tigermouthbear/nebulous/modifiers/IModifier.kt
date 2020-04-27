@@ -12,22 +12,22 @@ import java.util.stream.Collectors
  * @author Tigermouthbear
  */
 
-abstract class Modifier: Utils {
-	protected val classMap: MutableMap<String, ClassNode>
+interface IModifier: Utils {
+	val classMap: MutableMap<String, ClassNode>
 		get() = Nebulous.getClassNodes()
 
-	protected val classes: List<ClassNode>
+	val classes: List<ClassNode>
 		get() = ArrayList(classMap.values)
 
-	protected val filesMap: MutableMap<String, ByteArray>
+	val filesMap: MutableMap<String, ByteArray>
 		get() = Nebulous.getFiles()
 
-	protected val manifest: Manifest
+	val manifest: Manifest
 		get() = Nebulous.getManifest()
 
-	abstract fun modify()
+	fun modify()
 
-	protected fun applyRemap(remap: Map<String?, String?>?) {
+	fun applyRemap(remap: Map<String?, String?>?) {
 		val remapper = SimpleRemapper(remap)
 		for(node in classes) {
 			val copy = ClassNode()
@@ -38,11 +38,11 @@ abstract class Modifier: Utils {
 		}
 	}
 
-	protected fun getImplementations(target: ClassNode): List<ClassNode> {
+	fun getImplementations(target: ClassNode): List<ClassNode> {
 		return classes.stream().filter { cn -> cn.interfaces.contains(target.name) }.collect(Collectors.toList())
 	}
 
-	protected fun getExtensions(target: ClassNode): List<ClassNode> {
+	fun getExtensions(target: ClassNode): List<ClassNode> {
 		val extensions: MutableList<ClassNode> = mutableListOf()
 
 		classes.stream()
@@ -55,7 +55,7 @@ abstract class Modifier: Utils {
 		return extensions
 	}
 
-	protected fun isDependency(name: String): Boolean {
+	fun isDependency(name: String): Boolean {
 		val path = getPath(name)
 		for(depencency in Nebulous.getDependencies()) {
 			if(path.contains(depencency)) return true

@@ -1,6 +1,6 @@
-package me.tigermouthbear.nebulous.modifiers.renaming
+package me.tigermouthbear.nebulous.modifiers.renamers
 
-import me.tigermouthbear.nebulous.modifiers.Modifier
+import me.tigermouthbear.nebulous.modifiers.IModifier
 import me.tigermouthbear.nebulous.util.Dictionary
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.FieldNode
@@ -10,7 +10,7 @@ import java.util.*
  * @author Tigermouthbear
  */
 
-class FieldNameModifier: Modifier() {
+class FieldNameRenamer: IModifier {
 	override fun modify() {
 		val remap: MutableMap<String?, String?> = mutableMapOf()
 		val fieldMap: MutableMap<FieldNode, ClassNode> = mutableMapOf()

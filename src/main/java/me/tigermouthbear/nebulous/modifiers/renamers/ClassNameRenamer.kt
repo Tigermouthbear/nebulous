@@ -1,18 +1,14 @@
-package me.tigermouthbear.nebulous.modifiers.renaming
+package me.tigermouthbear.nebulous.modifiers.renamers
 
-import me.tigermouthbear.nebulous.modifiers.Modifier
+import me.tigermouthbear.nebulous.modifiers.IModifier
 import me.tigermouthbear.nebulous.util.Dictionary
-import java.io.ByteArrayInputStream
-import java.io.FileInputStream
-import java.io.InputStream
 import java.util.*
-import java.util.jar.Manifest
 
 /**
  * @author Tigermouthbear
  */
 
-class ClassNameModifier: Modifier() {
+class ClassNameRenamer: IModifier {
 	override fun modify() {
 		val remap: MutableMap<String?, String?> = HashMap()
 

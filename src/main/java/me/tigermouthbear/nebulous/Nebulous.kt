@@ -3,12 +3,15 @@ package me.tigermouthbear.nebulous
 import me.tigermouthbear.nebulous.config.ArrayConfig
 import me.tigermouthbear.nebulous.config.ConfigReader
 import me.tigermouthbear.nebulous.config.StringConfig
-import me.tigermouthbear.nebulous.modifiers.renaming.ClassNameModifier
-import me.tigermouthbear.nebulous.modifiers.renaming.FieldNameModifier
-import me.tigermouthbear.nebulous.modifiers.Modifier
-import me.tigermouthbear.nebulous.modifiers.constants.StringByteEncryptionModifier
-import me.tigermouthbear.nebulous.modifiers.constants.StringEncryptionModifier
-import me.tigermouthbear.nebulous.modifiers.renaming.MethodNameModifier
+import me.tigermouthbear.nebulous.modifiers.renamers.ClassNameRenamer
+import me.tigermouthbear.nebulous.modifiers.renamers.FieldNameRenamer
+import me.tigermouthbear.nebulous.modifiers.IModifier
+import me.tigermouthbear.nebulous.modifiers.constants.StringSplitter
+import me.tigermouthbear.nebulous.modifiers.constants.StringEncryptor
+import me.tigermouthbear.nebulous.modifiers.misc.DebugInfoRemover
+import me.tigermouthbear.nebulous.modifiers.misc.FullAccessFlags
+import me.tigermouthbear.nebulous.modifiers.misc.MemberShuffler
+import me.tigermouthbear.nebulous.modifiers.renamers.MethodNameRenamer
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
@@ -42,12 +45,23 @@ object Nebulous {
 
 		openJar(JarFile(input.value))
 
-		//val modifiers: List<Modifier> = arrayListOf(FieldNameModifier(), ClassNameModifier())
-		val modifiers: List<Modifier> = arrayListOf(StringEncryptionModifier(), StringByteEncryptionModifier(), FieldNameModifier(), MethodNameModifier(), ClassNameModifier())
+		val modifiers: List<IModifier> =
+		arrayListOf(
+				StringEncryptor(),
+				StringSplitter(),
+				FieldNameRenamer(),
+				MethodNameRenamer(),
+				ClassNameRenamer(),
+				MemberShuffler(),
+				FullAccessFlags(),
+				DebugInfoRemover()
+		)
 
 		modifiers.forEach { modifier -> modifier.modify() }
 
 		saveJar()
+
+		println("Finished!")
 	}
 
 	private fun openJar(jar: JarFile) {

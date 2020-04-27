@@ -1,6 +1,6 @@
 package me.tigermouthbear.nebulous.modifiers.constants
 
-import me.tigermouthbear.nebulous.modifiers.Modifier
+import me.tigermouthbear.nebulous.modifiers.IModifier
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.*
 
@@ -8,7 +8,7 @@ import org.objectweb.asm.tree.*
  * @author Tigermouthbear
  */
 
-class StringByteEncryptionModifier: Modifier() {
+class StringSplitter: IModifier {
 	override fun modify() {
 		classes.stream()
 		.filter { cn -> !isDependency(cn.name) }
@@ -21,15 +21,15 @@ class StringByteEncryptionModifier: Modifier() {
 				}
 
 				strings.forEach { ain ->
-					mn.instructions.insert(ain, obfuscate(ain))
+					mn.instructions.insert(ain, encrypt(ain))
 					mn.instructions.remove(ain)
 				}
 			}
 		}
 	}
 
-	private fun obfuscate(ain: AbstractInsnNode): InsnList {
-		val insnList = InsnList().apply {
+	private fun encrypt(ain: AbstractInsnNode): InsnList {
+		return InsnList().apply {
 			add(TypeInsnNode(NEW, "java/lang/String"))
 			add(InsnNode(DUP))
 
@@ -53,7 +53,5 @@ class StringByteEncryptionModifier: Modifier() {
 					"([B)V",
 					false))
 		}
-
-		return insnList
 	}
 }
