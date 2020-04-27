@@ -2,8 +2,8 @@ package me.tigermouthbear.nebulous.modifiers.constants
 
 import me.tigermouthbear.nebulous.Nebulous
 import me.tigermouthbear.nebulous.modifiers.IModifier
-import me.tigermouthbear.nebulous.encryption.strings.IStringEncryptor
-import me.tigermouthbear.nebulous.encryption.strings.PBEStringEncryptor
+import me.tigermouthbear.nebulous.encryption.IStringEncryptor
+import me.tigermouthbear.nebulous.encryption.PBEStringEncryptor
 import me.tigermouthbear.nebulous.util.Dictionary
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Opcodes.*

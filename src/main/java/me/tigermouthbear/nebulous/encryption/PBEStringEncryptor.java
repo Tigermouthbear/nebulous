@@ -1,4 +1,4 @@
-package me.tigermouthbear.nebulous.encryption.strings;
+package me.tigermouthbear.nebulous.encryption;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
