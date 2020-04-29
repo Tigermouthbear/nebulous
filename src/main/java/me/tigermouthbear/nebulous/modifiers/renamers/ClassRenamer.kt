@@ -17,7 +17,7 @@ class ClassRenamer: IModifier {
 		.filter { cn -> !isExcluded(cn.name) }
 		.forEach { cn ->
 			val name = Dictionary.getNewName()
-			remap[cn.name] = getPath(cn.name) + name
+			remap[cn.name] = name
 			if(cn.name.replace("/", ".") == manifest.mainAttributes.getValue("Main-Class"))
 				manifest.mainAttributes.putValue("Main-Class", name.replace("/", "."))
 		}

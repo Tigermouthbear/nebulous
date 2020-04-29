@@ -15,7 +15,6 @@ import me.tigermouthbear.nebulous.modifiers.optimizers.NOPRemover
 import me.tigermouthbear.nebulous.modifiers.renamers.ClassRenamer
 import me.tigermouthbear.nebulous.modifiers.renamers.FieldRenamer
 import me.tigermouthbear.nebulous.modifiers.renamers.MethodRenamer
-import me.tigermouthbear.nebulous.util.NebulousClassWriter
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
@@ -53,18 +52,21 @@ object Nebulous {
 
 		val modifiers: List<IModifier> =
 		arrayListOf(
-				//NumberPooler()
 				StringPooler(),
 				StringEncryptor(),
 				StringSplitter(),
+
+				NumberPooler(),
+
+				ClassRenamer(),
 				FieldRenamer(),
 				MethodRenamer(),
+
 				MemberShuffler(),
 				FullAccessFlags(),
 				DebugInfoRemover(),
-				NOPRemover(),
 
-				ClassRenamer()
+				NOPRemover()
 		)
 
 		modifiers.forEach { modifier ->
@@ -126,7 +128,8 @@ object Nebulous {
 		classNodes.values.forEach { cn ->
 			outJar.putNextEntry(JarEntry(cn.name + ".class"))
 
-			val writer = NebulousClassWriter(ClassWriter.COMPUTE_MAXS)
+			val writer = ClassWriter(ClassWriter.COMPUTE_MAXS)
+			writer.newUTF8("Secured by Nebulous")
 			cn.accept(writer)
 			outJar.write(writer.toByteArray())
 

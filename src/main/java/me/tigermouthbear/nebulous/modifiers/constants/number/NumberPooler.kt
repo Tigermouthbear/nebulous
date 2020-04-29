@@ -50,7 +50,7 @@ class NumberPooler: IModifier {
 						// add to array
 						add(InsnNode(DUP))
 						add(getLdcInt(index))
-						add(ain)
+						add(getLdcInt(getIntFromAin(ain)))
 						add(InsnNode(IASTORE))
 
 						// replace number with reference to array

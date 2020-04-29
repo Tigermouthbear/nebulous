@@ -1,13 +1,16 @@
 package me.tigermouthbear.nebulous.modifiers.constants.string
 
 import me.tigermouthbear.nebulous.Nebulous
+import me.tigermouthbear.nebulous.encryption.AESStringEncryptor
 import me.tigermouthbear.nebulous.modifiers.IModifier
 import me.tigermouthbear.nebulous.encryption.IStringEncryptor
 import me.tigermouthbear.nebulous.encryption.PBEStringEncryptor
+import me.tigermouthbear.nebulous.encryption.BlowfishStringEncryptor
 import me.tigermouthbear.nebulous.util.Dictionary
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.*
+import java.security.SecureRandom
 
 /**
  * @author Tigermouthbear
@@ -15,7 +18,8 @@ import org.objectweb.asm.tree.*
  */
 
 class StringEncryptor: IModifier {
-	private val encryptor = PBEStringEncryptor()
+	private val RANDOM = SecureRandom()
+	private val encryptors = arrayOf(PBEStringEncryptor(), BlowfishStringEncryptor(), AESStringEncryptor())
 
 	override fun modify() {
 		val encryptedStrings: MutableList<EncryptedString> = mutableListOf()
@@ -27,7 +31,7 @@ class StringEncryptor: IModifier {
 			cn.methods.forEach { mn ->
 				mn.instructions.toArray()
 				.filter { ain -> ain is LdcInsnNode && ain.cst is String }
-				.forEach { ain -> encryptedStrings.add(EncryptedString(cn, mn, ain as LdcInsnNode, encryptor, Dictionary.genRandomString())) }
+				.forEach { ain -> encryptedStrings.add(EncryptedString(cn, mn, ain as LdcInsnNode, encryptors[RANDOM.nextInt(encryptors.size)], Dictionary.genRandomString())) }
 			}
 		}
 
