@@ -1,4 +1,4 @@
-package me.tigermouthbear.nebulous.modifiers.constants
+package me.tigermouthbear.nebulous.modifiers.constants.string
 
 import me.tigermouthbear.nebulous.modifiers.IModifier
 import org.objectweb.asm.Opcodes.*
@@ -12,7 +12,7 @@ import org.objectweb.asm.tree.*
 class StringSplitter: IModifier {
 	override fun modify() {
 		classes.stream()
-		.filter { cn -> !isDependency(cn.name) }
+		.filter { cn -> !isExcluded(cn.name) }
 		.forEach { cn ->
 			cn.methods.forEach { mn ->
 				val strings: MutableList<LdcInsnNode> = mutableListOf()

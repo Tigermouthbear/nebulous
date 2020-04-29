@@ -14,10 +14,10 @@ class ClassRenamer: IModifier {
 		val remap: MutableMap<String?, String?> = HashMap()
 
 		classes.stream()
-		.filter { cn -> !isDependency(cn.name) }
+		.filter { cn -> !isExcluded(cn.name) }
 		.forEach { cn ->
 			val name = Dictionary.getNewName()
-			remap[cn.name] = name
+			remap[cn.name] = getPath(cn.name) + name
 			if(cn.name.replace("/", ".") == manifest.mainAttributes.getValue("Main-Class"))
 				manifest.mainAttributes.putValue("Main-Class", name.replace("/", "."))
 		}

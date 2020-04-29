@@ -14,13 +14,19 @@ class DebugInfoRemover: IModifier {
 	override fun modify() {
 		val map: MutableMap<String, ClassNode> = mutableMapOf()
 
-		classes.forEach { cn ->
+		classes.stream()
+		.filter { cn -> !isExcluded(cn.name) }
+		.forEach { cn ->
 			val cw = ClassWriter(ClassWriter.COMPUTE_MAXS)
 			cn.accept(cw)
 			val clone = ClassNode()
 			ClassReader(cw.toByteArray()).accept(clone, ClassReader.SKIP_DEBUG)
 			map[clone.name] = clone
 		}
+
+		classes.stream()
+		.filter { cn -> isExcluded(cn.name) }
+		.forEach { cn -> map[cn.name] = cn }
 
 		classMap.clear()
 		classMap.putAll(map)

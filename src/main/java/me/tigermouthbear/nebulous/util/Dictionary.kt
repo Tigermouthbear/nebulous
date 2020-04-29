@@ -18,7 +18,7 @@ object Dictionary {
 	private val stringsUsed: MutableList<String> = mutableListOf()
 
 	fun getNewName(): String {
-		return genWithDict(INVIS)
+		return getNextInAlphabet()
 		//return getNextInAlphabet()
 	}
 

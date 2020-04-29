@@ -1,6 +1,7 @@
 package me.tigermouthbear.nebulous.modifiers
 
 import me.tigermouthbear.nebulous.Nebulous
+import me.tigermouthbear.nebulous.util.NodeUtils
 import me.tigermouthbear.nebulous.util.Utils
 import org.objectweb.asm.commons.ClassRemapper
 import org.objectweb.asm.commons.SimpleRemapper
@@ -13,7 +14,7 @@ import java.util.stream.Collectors
  * @author Tigermouthbear
  */
 
-interface IModifier: Utils {
+interface IModifier: Utils, NodeUtils {
 	val classMap: MutableMap<String, ClassNode>
 		get() = Nebulous.getClassNodes()
 
@@ -56,35 +57,5 @@ interface IModifier: Utils {
 				}
 
 		return extensions
-	}
-
-	fun isDependency(name: String): Boolean {
-		val path = getPath(name)
-		for(depencency in Nebulous.getDependencies()) {
-			if(path.contains(depencency)) return true
-		}
-		return false
-	}
-
-	private fun getPath(name: String): String {
-		if(!name.contains("/")) return ""
-		val reversedString = reverseString(name)
-		val path = reversedString.substring(reversedString.indexOf("/"))
-		return reverseString(path)
-	}
-
-	private fun reverseString(string: String): String {
-		val sb = StringBuilder()
-		val chars = string.toCharArray()
-		for(i in chars.indices.reversed()) sb.append(chars[i])
-		return sb.toString()
-	}
-
-	fun getMethod(cn: ClassNode, method: String): MethodNode? {
-		cn.methods.forEach { mn ->
-			if(mn.name == method) return mn
-		}
-
-		return null
 	}
 }

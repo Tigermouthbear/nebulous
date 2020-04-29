@@ -4,9 +4,10 @@ import me.tigermouthbear.nebulous.config.ArrayConfig
 import me.tigermouthbear.nebulous.config.ConfigReader
 import me.tigermouthbear.nebulous.config.StringConfig
 import me.tigermouthbear.nebulous.modifiers.IModifier
-import me.tigermouthbear.nebulous.modifiers.constants.StringEncryptor
-import me.tigermouthbear.nebulous.modifiers.constants.StringPooler
-import me.tigermouthbear.nebulous.modifiers.constants.StringSplitter
+import me.tigermouthbear.nebulous.modifiers.constants.number.NumberPooler
+import me.tigermouthbear.nebulous.modifiers.constants.string.StringEncryptor
+import me.tigermouthbear.nebulous.modifiers.constants.string.StringPooler
+import me.tigermouthbear.nebulous.modifiers.constants.string.StringSplitter
 import me.tigermouthbear.nebulous.modifiers.misc.DebugInfoRemover
 import me.tigermouthbear.nebulous.modifiers.misc.FullAccessFlags
 import me.tigermouthbear.nebulous.modifiers.misc.MemberShuffler
@@ -14,6 +15,7 @@ import me.tigermouthbear.nebulous.modifiers.optimizers.NOPRemover
 import me.tigermouthbear.nebulous.modifiers.renamers.ClassRenamer
 import me.tigermouthbear.nebulous.modifiers.renamers.FieldRenamer
 import me.tigermouthbear.nebulous.modifiers.renamers.MethodRenamer
+import me.tigermouthbear.nebulous.util.NebulousClassWriter
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
@@ -36,7 +38,7 @@ import java.util.jar.Manifest
 object Nebulous {
 	private val input = StringConfig("input")
 	private val output = StringConfig("output")
-	private val dependencies = ArrayConfig("dependencies")
+	private val exclusions = ArrayConfig("exclusions")
 
 	private val files: MutableMap<String, ByteArray> = HashMap()
 	private val classNodes: MutableMap<String, ClassNode> = HashMap()
@@ -51,16 +53,18 @@ object Nebulous {
 
 		val modifiers: List<IModifier> =
 		arrayListOf(
+				//NumberPooler()
 				StringPooler(),
 				StringEncryptor(),
 				StringSplitter(),
 				FieldRenamer(),
-				//MethodRenamer(),
-				ClassRenamer(),
+				MethodRenamer(),
 				MemberShuffler(),
 				FullAccessFlags(),
 				DebugInfoRemover(),
-				NOPRemover()
+				NOPRemover(),
+
+				ClassRenamer()
 		)
 
 		modifiers.forEach { modifier ->
@@ -122,7 +126,7 @@ object Nebulous {
 		classNodes.values.forEach { cn ->
 			outJar.putNextEntry(JarEntry(cn.name + ".class"))
 
-			val writer = ClassWriter(ClassWriter.COMPUTE_MAXS)
+			val writer = NebulousClassWriter(ClassWriter.COMPUTE_MAXS)
 			cn.accept(writer)
 			outJar.write(writer.toByteArray())
 
@@ -151,9 +155,9 @@ object Nebulous {
 		return manifest
 	}
 
-	fun getDependencies(): List<String> {
+	fun getExclusions(): List<String> {
 		val temp: MutableList<String> = mutableListOf()
-		for(i in 0 until dependencies.value!!.length()) temp.add(dependencies.value!!.getString(i))
+		for(i in 0 until exclusions.value!!.length()) temp.add(exclusions.value!!.getString(i))
 		return temp
 	}
 }

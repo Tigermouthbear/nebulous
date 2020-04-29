@@ -1,6 +1,7 @@
 package me.tigermouthbear.nebulous.modifiers.renamers
 
 import me.tigermouthbear.nebulous.modifiers.IModifier
+import me.tigermouthbear.nebulous.util.ClassPath
 import me.tigermouthbear.nebulous.util.Dictionary
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.ClassNode
@@ -19,21 +20,43 @@ class MethodRenamer: IModifier {
 		val remap: MutableMap<String?, String?> = mutableMapOf()
 		val methodMap: MutableMap<MethodNode, ClassNode> = mutableMapOf()
 
+		// gather all methods into map
 		classes.stream()
-				.filter { cn -> !isDependency(cn.name) }
-				.forEach { cn ->
-					cn.methods.stream()
-						.filter { mn -> !blacklist.contains(mn.name) && !mn.name.startsWith("<") && mn.access and ACC_NATIVE == 0 }
-						.forEach { mn -> methodMap[mn] = cn }
-				}
+		.filter { cn -> !isExcluded(cn.name) && cn.access and ACC_ANNOTATION == 0 && cn.access and ACC_ENUM == 0 }
+		.forEach { cn ->
+			cn.methods.stream()
+				.filter { mn -> !blacklist.contains(mn.name) && !mn.name.startsWith("<") && mn.access and ACC_NATIVE == 0 }
+				.forEach { mn -> methodMap[mn] = cn }
+		}
 
+		// create obfuscated names
+		methods@
 		for((mn, owner) in methodMap.entries) {
-			val name = Dictionary.getNewName()
-
 			val stack = Stack<ClassNode?>()
 			stack.add(owner)
 
-			while(!stack.empty()) {
+			while(stack.isNotEmpty()) {
+				val cn = stack.pop()
+
+				// if not top level method continue
+				if(cn != owner && cn!!.methods.findLast { method -> method.name == mn.name && method.desc == mn.desc } != null)
+					continue@methods
+
+				// push super class
+				val parent = getClassNode(cn.superName)
+				if(parent != null) stack.push(parent)
+
+				// push interfaces that it implements
+				cn.interfaces.forEach { inter ->
+					val interfNode = getClassNode(inter);
+					if(interfNode != null) stack.push(interfNode)
+				}
+			}
+
+			val name = Dictionary.getNewName()
+			stack.add(owner)
+
+			while(stack.isNotEmpty()) {
 				val cn = stack.pop()
 				remap[cn!!.name + "." + mn.name + mn.desc] = name
 
@@ -44,6 +67,12 @@ class MethodRenamer: IModifier {
 		}
 
 		applyRemap(remap)
+	}
+
+	private fun getClassNode(name: String?): ClassNode? {
+		if(name == null) return null
+		val n = classMap[name]
+		return n ?: ClassPath[name]
 	}
 
 	override fun getName(): String {

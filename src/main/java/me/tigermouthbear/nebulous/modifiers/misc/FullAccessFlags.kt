@@ -11,7 +11,7 @@ import org.objectweb.asm.Opcodes.*
 class FullAccessFlags: IModifier {
 	override fun modify() {
 		classes.stream()
-		.filter { cn -> !isDependency(cn.name) }
+		.filter { cn -> !isExcluded(cn.name) }
 		.forEach {cn ->
 			cn.apply {
 				access = access(access)

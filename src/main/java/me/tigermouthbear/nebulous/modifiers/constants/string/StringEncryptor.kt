@@ -1,4 +1,4 @@
-package me.tigermouthbear.nebulous.modifiers.constants
+package me.tigermouthbear.nebulous.modifiers.constants.string
 
 import me.tigermouthbear.nebulous.Nebulous
 import me.tigermouthbear.nebulous.modifiers.IModifier
@@ -22,7 +22,7 @@ class StringEncryptor: IModifier {
 
 		// add all ldc strings to encrypted strings list
 		classes.stream()
-		.filter { cn -> !isDependency(cn.name) }
+		.filter { cn -> !isExcluded(cn.name) }
 		.forEach { cn ->
 			cn.methods.forEach { mn ->
 				mn.instructions.toArray()

@@ -17,10 +17,11 @@ class FieldRenamer: IModifier {
 		val fieldMap: MutableMap<FieldNode, ClassNode> = mutableMapOf()
 
 		classes.stream()
-		.filter { cn -> !isDependency(cn.name) }
+		.filter { cn -> !isExcluded(cn.name) }
 		.forEach { cn -> cn.fields
 		.forEach { fn -> fieldMap[fn] = cn } }
 
+		// create obfuscated names
 		for((fn, owner) in fieldMap.entries) {
 			val name = Dictionary.getNewName()
 
