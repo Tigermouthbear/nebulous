@@ -6,6 +6,10 @@ import org.objectweb.asm.tree.InsnNode
 import org.objectweb.asm.tree.IntInsnNode
 import org.objectweb.asm.tree.LdcInsnNode
 
+/**
+ * @author Tigermouthbear
+ * Utils to interface with nodes
+ */
 
 interface NodeUtils {
 	fun getLdcInt(int: Int): AbstractInsnNode {
@@ -28,8 +32,6 @@ interface NodeUtils {
 	}
 
 	fun getIntFromAin(ain: AbstractInsnNode): Int {
-
-
 		return when(ain.opcode) {
 			ICONST_M1 -> -1
 			ICONST_0 -> 0

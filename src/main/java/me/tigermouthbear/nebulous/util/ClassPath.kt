@@ -1,6 +1,5 @@
 package me.tigermouthbear.nebulous.util
 
-import me.tigermouthbear.nebulous.Nebulous
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.tree.ClassNode
 import java.io.ByteArrayOutputStream
@@ -9,6 +8,7 @@ import java.util.stream.Stream
 
 /**
  * @author Tigermouthbear
+ * Holds class nodes of external nodes for use with obfuscation
  */
 
 object ClassPath: HashMap<String, ClassNode>() {

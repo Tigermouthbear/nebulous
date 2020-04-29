@@ -52,20 +52,25 @@ object Nebulous {
 
 		val modifiers: List<IModifier> =
 		arrayListOf(
+				// strings
 				StringPooler(),
 				StringEncryptor(),
 				StringSplitter(),
 
+				// numbers
 				NumberPooler(),
 
-				ClassRenamer(),
+				// names
 				FieldRenamer(),
 				MethodRenamer(),
+				ClassRenamer(),
 
+				// misc
 				MemberShuffler(),
 				FullAccessFlags(),
 				DebugInfoRemover(),
 
+				// optimizers
 				NOPRemover()
 		)
 

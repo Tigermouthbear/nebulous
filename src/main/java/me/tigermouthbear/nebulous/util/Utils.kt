@@ -4,6 +4,11 @@ import me.tigermouthbear.nebulous.Nebulous
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.*
 
+/**
+ * @author Tigermouthbear
+ * General Utils
+ */
+
 interface Utils {
 	fun isExcluded(name: String): Boolean {
 		val path = getPath(name)

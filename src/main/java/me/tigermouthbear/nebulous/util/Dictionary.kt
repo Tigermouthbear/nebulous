@@ -7,6 +7,7 @@ import kotlin.math.ln
 
 /**
  * @author Tigermouthbear
+ * Name generator for obfuscation
  */
 
 object Dictionary {
