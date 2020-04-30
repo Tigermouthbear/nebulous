@@ -11,10 +11,14 @@ import me.tigermouthbear.nebulous.modifiers.constants.string.StringSplitter
 import me.tigermouthbear.nebulous.modifiers.misc.DebugInfoRemover
 import me.tigermouthbear.nebulous.modifiers.misc.FullAccessFlags
 import me.tigermouthbear.nebulous.modifiers.misc.MemberShuffler
+import me.tigermouthbear.nebulous.modifiers.optimizers.GotoInliner
+import me.tigermouthbear.nebulous.modifiers.optimizers.GotoReturnInliner
+import me.tigermouthbear.nebulous.modifiers.optimizers.LineNumberRemover
 import me.tigermouthbear.nebulous.modifiers.optimizers.NOPRemover
 import me.tigermouthbear.nebulous.modifiers.renamers.ClassRenamer
 import me.tigermouthbear.nebulous.modifiers.renamers.FieldRenamer
 import me.tigermouthbear.nebulous.modifiers.renamers.MethodRenamer
+import me.tigermouthbear.nebulous.util.ClassPath
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
@@ -38,6 +42,7 @@ object Nebulous {
 	private val input = StringConfig("input")
 	private val output = StringConfig("output")
 	private val exclusions = ArrayConfig("exclusions")
+	private val libraries = ArrayConfig("libraries")
 
 	private val files: MutableMap<String, ByteArray> = HashMap()
 	private val classNodes: MutableMap<String, ClassNode> = HashMap()
@@ -48,30 +53,35 @@ object Nebulous {
 
 		ConfigReader.read(config)
 
+		// load jar and libraries
 		openJar(JarFile(input.value))
+		ClassPath.load(getLibraries())
 
 		val modifiers: List<IModifier> =
 		arrayListOf(
 				// strings
-				StringPooler(),
-				StringEncryptor(),
-				StringSplitter(),
+				StringPooler,
+				StringEncryptor,
+				StringSplitter,
 
 				// numbers
-				NumberPooler(),
+				NumberPooler,
 
 				// names
-				FieldRenamer(),
-				MethodRenamer(),
-				ClassRenamer(),
+				FieldRenamer,
+				MethodRenamer,
+				ClassRenamer,
 
 				// misc
-				MemberShuffler(),
-				FullAccessFlags(),
-				DebugInfoRemover(),
+				MemberShuffler,
+				FullAccessFlags,
+				DebugInfoRemover,
 
 				// optimizers
-				NOPRemover()
+				NOPRemover,
+				LineNumberRemover,
+				GotoInliner,
+				GotoReturnInliner
 		)
 
 		modifiers.forEach { modifier ->
@@ -166,6 +176,12 @@ object Nebulous {
 	fun getExclusions(): List<String> {
 		val temp: MutableList<String> = mutableListOf()
 		for(i in 0 until exclusions.value!!.length()) temp.add(exclusions.value!!.getString(i))
+		return temp
+	}
+
+	fun getLibraries(): List<String> {
+		val temp: MutableList<String> = mutableListOf()
+		for(i in 0 until libraries.value!!.length()) temp.add(libraries.value!!.getString(i))
 		return temp
 	}
 }

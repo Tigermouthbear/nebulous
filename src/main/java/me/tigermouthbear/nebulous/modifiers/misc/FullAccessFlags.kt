@@ -8,7 +8,7 @@ import org.objectweb.asm.Opcodes.*
  * Sets all nodes to have full access flags
  */
 
-class FullAccessFlags: IModifier {
+object FullAccessFlags: IModifier {
 	override fun modify() {
 		classes.stream()
 		.filter { cn -> !isExcluded(cn.name) }

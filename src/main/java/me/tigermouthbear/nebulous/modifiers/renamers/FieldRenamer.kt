@@ -11,7 +11,7 @@ import java.util.*
  * Renames all fields to use the current dictionary
  */
 
-class FieldRenamer: IModifier {
+object FieldRenamer: IModifier {
 	override fun modify() {
 		val remap: MutableMap<String?, String?> = mutableMapOf()
 		val fieldMap: MutableMap<FieldNode, ClassNode> = mutableMapOf()

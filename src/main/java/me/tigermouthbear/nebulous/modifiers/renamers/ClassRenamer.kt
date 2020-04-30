@@ -9,7 +9,7 @@ import java.util.*
  * Renames all classes to use the current dictionary
  */
 
-class ClassRenamer: IModifier {
+object ClassRenamer: IModifier {
 	override fun modify() {
 		val remap: MutableMap<String?, String?> = HashMap()
 

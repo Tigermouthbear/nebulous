@@ -13,7 +13,7 @@ import java.util.*
  * Renames all methods to use the current dictionary
  */
 
-class MethodRenamer: IModifier {
+object MethodRenamer: IModifier {
 	private val blacklist = arrayListOf("main", "createUI")
 
 	override fun modify() {

@@ -17,7 +17,7 @@ import java.security.SecureRandom
  * Encrypts all string ldcs with a custom cipher
  */
 
-class StringEncryptor: IModifier {
+object StringEncryptor: IModifier {
 	private val RANDOM = SecureRandom()
 	private val encryptors = arrayOf(PBEStringEncryptor(), BlowfishStringEncryptor(), AESStringEncryptor())
 

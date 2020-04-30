@@ -4,8 +4,8 @@ import me.tigermouthbear.nebulous.modifiers.IModifier
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.*
 
-class NumberPooler: IModifier {
-	private val arrayName = "numberPoolArray"
+object NumberPooler: IModifier {
+	private const val arrayName = "numberPoolArray"
 
 	override fun modify() {
 		// move all numbers to array

@@ -8,7 +8,7 @@ import java.util.*
  * Shuffles the order of all nodes
  */
 
-class MemberShuffler: IModifier {
+object MemberShuffler: IModifier {
 	override fun modify() {
 		classes.stream()
 		.filter { cn -> !isExcluded(cn.name) }

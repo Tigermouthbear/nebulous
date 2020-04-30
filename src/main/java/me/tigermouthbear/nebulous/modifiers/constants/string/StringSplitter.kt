@@ -9,7 +9,7 @@ import org.objectweb.asm.tree.*
  * Splits all string ldcs into their given byte arrays
  */
 
-class StringSplitter: IModifier {
+object StringSplitter: IModifier {
 	override fun modify() {
 		classes.stream()
 		.filter { cn -> !isExcluded(cn.name) }
@@ -22,14 +22,14 @@ class StringSplitter: IModifier {
 				}
 
 				strings.forEach { ldc ->
-					mn.instructions.insert(ldc, encrypt(ldc))
+					mn.instructions.insert(ldc, split(ldc))
 					mn.instructions.remove(ldc)
 				}
 			}
 		}
 	}
 
-	private fun encrypt(ldc: LdcInsnNode): InsnList {
+	private fun split(ldc: LdcInsnNode): InsnList {
 		return InsnList().apply {
 			add(TypeInsnNode(NEW, "java/lang/String"))
 			add(InsnNode(DUP))

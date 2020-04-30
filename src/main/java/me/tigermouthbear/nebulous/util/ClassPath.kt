@@ -12,11 +12,11 @@ import java.util.stream.Stream
  */
 
 object ClassPath: HashMap<String, ClassNode>() {
-	init {
+	fun load(paths: List<String>) {
 		val classpath = System.getProperty("java.class.path").split(System.getProperty("path.separator")).toTypedArray()
 		Stream.of(*classpath).filter { path: String -> path.endsWith(".jar") }.forEach(this::add)
 
-		add("C:\\Users\\bearw\\Desktop\\test\\build\\libs\\forge-1.12.2-14.23.5.2768-PROJECT(ares)-srgBin.jar")
+		paths.forEach { path -> add(path) }
 	}
 
 	fun add(path: String) {

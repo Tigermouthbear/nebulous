@@ -9,8 +9,8 @@ import org.objectweb.asm.tree.*
  * Moves all string ldcs to a single array in a given class
  */
 
-class StringPooler: IModifier {
-	private val arrayName = "stringPoolArray"
+object StringPooler: IModifier {
+	private const val arrayName = "stringPoolArray"
 
 	override fun modify() {
 		// move all strings to array

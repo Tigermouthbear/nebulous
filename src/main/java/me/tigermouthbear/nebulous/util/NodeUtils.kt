@@ -46,4 +46,8 @@ interface NodeUtils {
 			else -> -2 // should not get here
 		}
 	}
+
+	fun isReturn(ain: AbstractInsnNode): Boolean {
+		return ain.opcode in IRETURN..RETURN
+	}
 }
