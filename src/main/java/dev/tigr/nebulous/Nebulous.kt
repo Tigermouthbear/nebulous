@@ -57,7 +57,7 @@ object Nebulous {
                 arrayListOf(
                         // strings
                         StringPooler,
-                        StringEncryptor,
+                        //StringEncryptor,
                         //StringSplitter,
 
                         // numbers
@@ -78,9 +78,6 @@ object Nebulous {
                         LineNumberRemover,
                         GotoInliner,
                         GotoReturnInliner
-
-
-                        //Packer
                 )
 
         modifiers.forEach { modifier ->

@@ -19,9 +19,11 @@ object MethodRenamer : IModifier {
         val remap: MutableMap<String?, String?> = mutableMapOf()
         val methodMap: MutableMap<MethodNode, ClassNode> = mutableMapOf()
 
+        //TODO: Make this work with acc_annotation acc_enum and acc_abstract
+
         // gather all methods into map
         classes.stream()
-                .filter { cn -> !isExcluded(cn.name) && cn.access and ACC_ANNOTATION == 0 && cn.access and ACC_ENUM == 0 }
+                .filter { cn -> !isExcluded(cn.name) && cn.access and ACC_ANNOTATION == 0 && cn.access and ACC_ENUM == 0 && cn.access and ACC_ABSTRACT == 0 }
                 .forEach { cn ->
                     cn.methods.stream()
                             .filter { mn -> !blacklist.contains(mn.name) && !mn.name.startsWith("<") && mn.access and ACC_NATIVE == 0 }
@@ -48,7 +50,7 @@ object MethodRenamer : IModifier {
                 // push interfaces that it implements
                 cn.interfaces.forEach { inter ->
                     val interfNode = getClassNode(inter)
-					if (interfNode != null) stack.push(interfNode)
+                    if (interfNode != null) stack.push(interfNode)
                 }
             }
 
