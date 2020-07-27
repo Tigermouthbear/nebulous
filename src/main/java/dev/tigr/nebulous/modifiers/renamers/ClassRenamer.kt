@@ -8,24 +8,23 @@ import java.util.*
  * @author Tigermouthbear
  * Renames all classes to use the current dictionary
  */
+object ClassRenamer : IModifier {
+    override fun modify() {
+        val remap: MutableMap<String?, String?> = HashMap()
 
-object ClassRenamer: IModifier {
-	override fun modify() {
-		val remap: MutableMap<String?, String?> = HashMap()
+        classes.stream()
+                .filter { cn -> !isExcluded(cn.name) }
+                .forEach { cn ->
+                    val name = getPath(cn.name) + Dictionary.getNewName()
+                    remap[cn.name] = name
+                    if (cn.name.replace("/", ".") == manifest.mainAttributes.getValue("Main-Class"))
+                        manifest.mainAttributes.putValue("Main-Class", name.replace("/", "."))
+                }
 
-		classes.stream()
-		.filter { cn -> !isExcluded(cn.name) }
-		.forEach { cn ->
-			val name = getPath(cn.name) + Dictionary.getNewName()
-			remap[cn.name] = name
-			if(cn.name.replace("/", ".") == manifest.mainAttributes.getValue("Main-Class"))
-				manifest.mainAttributes.putValue("Main-Class", name.replace("/", "."))
-		}
+        applyRemap(remap)
+    }
 
-		applyRemap(remap)
-	}
-
-	override fun getName(): String {
-		return "Class Renamer"
-	}
+    override fun getName(): String {
+        return "Class Renamer"
+    }
 }

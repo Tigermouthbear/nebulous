@@ -3,42 +3,45 @@ package dev.tigr.nebulous.config;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Tigermouthbear
+ */
 public class Config<T> {
-	private static List<Config> configs = new ArrayList<>();
+    private static final List<Config> configs = new ArrayList<>();
 
-	private String name;
-	private Type type;
-	private T value;
+    private final String name;
+    private final Type type;
+    private T value;
 
-	public Config(String name, Type type) {
-		this.name = name;
-		this.type = type;
+    public Config(String name, Type type) {
+        this.name = name;
+        this.type = type;
 
-		configs.add(this);
-	}
+        configs.add(this);
+    }
 
-	enum Type {
-		ARRAY,
-		STRING
-	}
+    public static List<Config> getAll() {
+        return configs;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public Type getType() {
-		return type;
-	}
+    public Type getType() {
+        return type;
+    }
 
-	public T getValue() {
-		return value;
-	}
+    public T getValue() {
+        return value;
+    }
 
-	public void setValue(T value) {
-		this.value = value;
-	}
+    public void setValue(T value) {
+        this.value = value;
+    }
 
-	public static List<Config> getAll() {
-		return configs;
-	}
+    enum Type {
+        ARRAY,
+        STRING
+    }
 }

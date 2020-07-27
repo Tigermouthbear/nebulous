@@ -34,132 +34,131 @@ import java.util.jar.Manifest
 /**
  * @author Tigermouthbear
  */
-
 object Nebulous {
-	private val input = StringConfig("input")
-	private val output = StringConfig("output")
-	private val exclusions = ArrayConfig("exclusions")
-	private val libraries = ArrayConfig("libraries")
+    private val input = StringConfig("input")
+    private val output = StringConfig("output")
+    private val exclusions = ArrayConfig("exclusions")
+    private val libraries = ArrayConfig("libraries")
 
-	private val files: MutableMap<String, ByteArray> = HashMap()
-	private val classNodes: MutableMap<String, ClassNode> = HashMap()
-	private lateinit var manifest: Manifest
+    private val files: MutableMap<String, ByteArray> = HashMap()
+    private val classNodes: MutableMap<String, ClassNode> = HashMap()
+    private lateinit var manifest: Manifest
 
-	fun run(config: File) {
-		val startTime = System.currentTimeMillis()
+    fun run(config: File) {
+        val startTime = System.currentTimeMillis()
 
-		ConfigReader.read(config)
+        ConfigReader.read(config)
 
-		// load jar and libraries
-		openJar(JarFile(input.value))
-		ClassPath.load(getLibraries())
+        // load jar and libraries
+        openJar(JarFile(input.value))
+        ClassPath.load(getLibraries())
 
-		val modifiers: List<IModifier> =
-		arrayListOf(
-				// strings
-				StringPooler,
-				StringEncryptor,
-				//StringSplitter,
+        val modifiers: List<IModifier> =
+                arrayListOf(
+                        // strings
+                        StringPooler,
+                        StringEncryptor,
+                        //StringSplitter,
 
-				// numbers
-				//NumberPooler,
+                        // numbers
+                        //NumberPooler,
 
-				// names
-				FieldRenamer,
-				MethodRenamer,
-				ClassRenamer,
+                        // names
+                        FieldRenamer,
+                        MethodRenamer,
+                        ClassRenamer,
 
-				// misc
-				MemberShuffler,
-				FullAccessFlags,
-				DebugInfoRemover,
+                        // misc
+                        MemberShuffler,
+                        FullAccessFlags,
+                        DebugInfoRemover,
 
-				// optimizers
-				NOPRemover,
-				LineNumberRemover,
-				GotoInliner,
-				GotoReturnInliner
+                        // optimizers
+                        NOPRemover,
+                        LineNumberRemover,
+                        GotoInliner,
+                        GotoReturnInliner
 
 
-			//Packer
-		)
+                        //Packer
+                )
 
-		modifiers.forEach { modifier ->
-			val current = System.currentTimeMillis()
-			modifier.modify()
-			println(modifier.getName() + " completed in " + (System.currentTimeMillis() - current) + " milliseconds")
-		}
+        modifiers.forEach { modifier ->
+            val current = System.currentTimeMillis()
+            modifier.modify()
+            println(modifier.getName() + " completed in " + (System.currentTimeMillis() - current) + " milliseconds")
+        }
 
-		saveJar()
+        saveJar()
 
-		println("\nNebulous finished in " + (System.currentTimeMillis() - startTime) + " milliseconds")
-	}
+        println("\nNebulous finished in " + (System.currentTimeMillis() - startTime) + " milliseconds")
+    }
 
-	private fun openJar(jar: JarFile) {
-		val entries = jar.entries()
+    private fun openJar(jar: JarFile) {
+        val entries = jar.entries()
 
-		while(entries.hasMoreElements()) {
-			val entry = entries.nextElement()
+        while (entries.hasMoreElements()) {
+            val entry = entries.nextElement()
 
-			jar.getInputStream(entry).use { `in` ->
-				val bytes: ByteArray
-				val baos = ByteArrayOutputStream()
-				val buf = ByteArray(256)
-				var n: Int
-				while(`in`.read(buf).also { n = it } != -1) {
-					baos.write(buf, 0, n)
-				}
-				bytes = baos.toByteArray()
+            jar.getInputStream(entry).use { `in` ->
+                val bytes: ByteArray
+                val baos = ByteArrayOutputStream()
+                val buf = ByteArray(256)
+                var n: Int
+                while (`in`.read(buf).also { n = it } != -1) {
+                    baos.write(buf, 0, n)
+                }
+                bytes = baos.toByteArray()
 
-				if(!entry.name.endsWith(".class")) {
-					files[entry.name] = bytes
-				} else {
-					val c = ClassNode()
-					ClassReader(bytes).accept(c, ClassReader.EXPAND_FRAMES)
-					classNodes.put(c.name, c)
-				}
-			}
-		}
+                if (!entry.name.endsWith(".class")) {
+                    files[entry.name] = bytes
+                } else {
+                    val c = ClassNode()
+                    ClassReader(bytes).accept(c, ClassReader.EXPAND_FRAMES)
+                    classNodes.put(c.name, c)
+                }
+            }
+        }
 
-		// open manifest
-		manifest = jar.manifest
-	}
+        // open manifest
+        manifest = jar.manifest
+    }
 
-	private fun saveJar() {
-		// save manifest
-		val mos = ByteArrayOutputStream()
-		manifest.write(mos)
-		files["META-INF/MANIFEST.MF"] = mos.toByteArray()
+    private fun saveJar() {
+        // save manifest
+        val mos = ByteArrayOutputStream()
+        manifest.write(mos)
+        files["META-INF/MANIFEST.MF"] = mos.toByteArray()
 
-		var location: String = output.value
-		if(!location.endsWith(".jar")) location += ".jar"
+        var location: String = output.value
+        if (!location.endsWith(".jar")) location += ".jar"
 
-		val jarPath = Paths.get(location)
-		Files.deleteIfExists(jarPath)
+        val jarPath = Paths.get(location)
+        Files.deleteIfExists(jarPath)
 
-		val outJar = JarOutputStream(Files.newOutputStream(jarPath, StandardOpenOption.CREATE, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE))
+        val outJar = JarOutputStream(Files.newOutputStream(jarPath, StandardOpenOption.CREATE, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE))
 
         // write classes into jar
-		classNodes.values.forEach { cn ->
-			outJar.putNextEntry(JarEntry(cn.name + ".class"))
+        classNodes.values.forEach { cn ->
+            outJar.putNextEntry(JarEntry(cn.name + ".class"))
 
-			val writer = ClassWriter(ClassWriter.COMPUTE_MAXS)
-			writer.newUTF8("Secured by Nebulous")
-			cn.accept(writer)
-			outJar.write(writer.toByteArray())
+            val writer = ClassWriter(ClassWriter.COMPUTE_MAXS)
+            writer.newUTF8("Secured by Nebulous")
+            cn.accept(writer)
+            outJar.write(writer.toByteArray())
 
-			outJar.closeEntry()
-		}
+            outJar.closeEntry()
+        }
 
-		// copy files into jar
-		files.entries.forEach { (key, value) ->
-			outJar.putNextEntry(JarEntry(key))
-			outJar.write(value)
-			outJar.closeEntry()
-		}
+        // copy files into jar
+        files.entries.forEach { (key, value) ->
+            outJar.putNextEntry(JarEntry(key))
+            outJar.write(value)
+            outJar.closeEntry()
+        }
 
-		outJar.close()
-	}
+        outJar.close()
+    }
 
     fun getClassNodes(): MutableMap<String, ClassNode> {
         return classNodes
@@ -169,19 +168,19 @@ object Nebulous {
         return files
     }
 
-	fun getManifest(): Manifest {
-		return manifest
-	}
+    fun getManifest(): Manifest {
+        return manifest
+    }
 
-	fun getExclusions(): List<String> {
-		val temp: MutableList<String> = mutableListOf()
-		for(i in 0 until exclusions.value!!.length()) temp.add(exclusions.value!!.getString(i))
-		return temp
-	}
+    fun getExclusions(): List<String> {
+        val temp: MutableList<String> = mutableListOf()
+        for (i in 0 until exclusions.value!!.length()) temp.add(exclusions.value!!.getString(i))
+        return temp
+    }
 
-	fun getLibraries(): List<String> {
-		val temp: MutableList<String> = mutableListOf()
-		for(i in 0 until libraries.value!!.length()) temp.add(libraries.value!!.getString(i))
-		return temp
-	}
+    fun getLibraries(): List<String> {
+        val temp: MutableList<String> = mutableListOf()
+        for (i in 0 until libraries.value!!.length()) temp.add(libraries.value!!.getString(i))
+        return temp
+    }
 }
