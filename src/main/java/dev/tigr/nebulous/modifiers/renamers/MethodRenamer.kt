@@ -12,7 +12,7 @@ import java.util.*
  * @author Tigermouthbear
  * Renames all methods to use the current dictionary
  */
-object MethodRenamer : IModifier {
+object MethodRenamer: IModifier {
     private val blacklist = arrayListOf("main", "createUI")
 
     override fun modify() {
@@ -32,32 +32,32 @@ object MethodRenamer : IModifier {
 
         // create obfuscated names
         methods@
-        for ((mn, owner) in methodMap.entries) {
+        for((mn, owner) in methodMap.entries) {
             val stack = Stack<ClassNode?>()
             stack.add(owner)
 
-            while (stack.isNotEmpty()) {
+            while(stack.isNotEmpty()) {
                 val cn = stack.pop()
 
                 // if not top level method continue
-                if (cn != owner && cn!!.methods.findLast { method -> method.name == mn.name && method.desc == mn.desc } != null)
+                if(cn != owner && cn!!.methods.findLast { method -> method.name == mn.name && method.desc == mn.desc } != null)
                     continue@methods
 
                 // push super class
                 val parent = getClassNode(cn.superName)
-                if (parent != null) stack.push(parent)
+                if(parent != null) stack.push(parent)
 
                 // push interfaces that it implements
                 cn.interfaces.forEach { inter ->
                     val interfNode = getClassNode(inter)
-                    if (interfNode != null) stack.push(interfNode)
+                    if(interfNode != null) stack.push(interfNode)
                 }
             }
 
             val name = Dictionary.getNewName()
             stack.add(owner)
 
-            while (stack.isNotEmpty()) {
+            while(stack.isNotEmpty()) {
                 val cn = stack.pop()
                 remap[cn!!.name + "." + mn.name + mn.desc] = name
 
@@ -71,7 +71,7 @@ object MethodRenamer : IModifier {
     }
 
     private fun getClassNode(name: String?): ClassNode? {
-        if (name == null) return null
+        if(name == null) return null
         val n = classMap[name]
         return n ?: ClassPath[name]
     }

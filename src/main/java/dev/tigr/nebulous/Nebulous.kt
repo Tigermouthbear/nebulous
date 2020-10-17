@@ -1,11 +1,9 @@
 package dev.tigr.nebulous
 
-import dev.tigr.nebulous.config.ArrayConfig
-import dev.tigr.nebulous.config.ConfigReader
-import dev.tigr.nebulous.config.StringConfig
 import dev.tigr.nebulous.modifiers.IModifier
-import dev.tigr.nebulous.modifiers.constants.string.StringEncryptor
+import dev.tigr.nebulous.modifiers.constants.number.NumberPooler
 import dev.tigr.nebulous.modifiers.constants.string.StringPooler
+import dev.tigr.nebulous.modifiers.constants.string.StringSplitter
 import dev.tigr.nebulous.modifiers.misc.DebugInfoRemover
 import dev.tigr.nebulous.modifiers.misc.FullAccessFlags
 import dev.tigr.nebulous.modifiers.misc.MemberShuffler
@@ -16,9 +14,8 @@ import dev.tigr.nebulous.modifiers.optimizers.NOPRemover
 import dev.tigr.nebulous.modifiers.renamers.ClassRenamer
 import dev.tigr.nebulous.modifiers.renamers.FieldRenamer
 import dev.tigr.nebulous.modifiers.renamers.MethodRenamer
-import dev.tigr.nebulous.util.ClassPath
+import dev.tigr.nebulous.util.*
 import org.objectweb.asm.ClassReader
-import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -35,11 +32,12 @@ import java.util.jar.Manifest
  * @author Tigermouthbear
  */
 object Nebulous {
-    private val input = StringConfig("input")
-    private val output = StringConfig("output")
+    private val input = StringConfig("input", true)
+    private val output = StringConfig("output", true)
     private val exclusions = ArrayConfig("exclusions")
     private val libraries = ArrayConfig("libraries")
 
+    private lateinit var ioMode: IOMode
     private val files: MutableMap<String, ByteArray> = HashMap()
     private val classNodes: MutableMap<String, ClassNode> = HashMap()
     private lateinit var manifest: Manifest
@@ -47,10 +45,16 @@ object Nebulous {
     fun run(config: File) {
         val startTime = System.currentTimeMillis()
 
-        ConfigReader.read(config)
+        Config.read(config)
 
-        // load jar and libraries
-        openJar(JarFile(input.value))
+        // load jar
+        val fileIn = File(input.value)
+        if(!fileIn.exists()) {
+            println("Input file not found!")
+            return
+        }
+        openFile(fileIn)
+
         ClassPath.load(getLibraries())
 
         val modifiers: List<IModifier> =
@@ -58,19 +62,19 @@ object Nebulous {
                         // strings
                         StringPooler,
                         //StringEncryptor,
-                        //StringSplitter,
+                        StringSplitter,
 
                         // numbers
-                        //NumberPooler,
+                        NumberPooler,
 
                         // names
-                        FieldRenamer,
-                        MethodRenamer,
-                        ClassRenamer,
+                        //FieldRenamer,
+                        //MethodRenamer,
+                        //ClassRenamer,
 
                         // misc
-                        MemberShuffler,
-                        FullAccessFlags,
+                        //MemberShuffler,
+                        //FullAccessFlags,
                         DebugInfoRemover,
 
                         // optimizers
@@ -86,39 +90,55 @@ object Nebulous {
             println(modifier.getName() + " completed in " + (System.currentTimeMillis() - current) + " milliseconds")
         }
 
-        saveJar()
+        saveFile()
 
         println("\nNebulous finished in " + (System.currentTimeMillis() - startTime) + " milliseconds")
+    }
+
+    private fun openFile(file: File) {
+        if(file.name.endsWith(".jar")) {
+            ioMode = IOMode.JAR
+            openJar(JarFile(file))
+        }
+        else if(file.name.endsWith(".class")) {
+            ioMode = IOMode.CLASS
+            openClass(file)
+        }
     }
 
     private fun openJar(jar: JarFile) {
         val entries = jar.entries()
 
-        while (entries.hasMoreElements()) {
+        while(entries.hasMoreElements()) {
             val entry = entries.nextElement()
 
-            jar.getInputStream(entry).use { `in` ->
-                val bytes: ByteArray
-                val baos = ByteArrayOutputStream()
-                val buf = ByteArray(256)
-                var n: Int
-                while (`in`.read(buf).also { n = it } != -1) {
-                    baos.write(buf, 0, n)
-                }
-                bytes = baos.toByteArray()
+            val bytes: ByteArray = Utils.readBytes(jar.getInputStream(entry))
 
-                if (!entry.name.endsWith(".class")) {
-                    files[entry.name] = bytes
-                } else {
-                    val c = ClassNode()
-                    ClassReader(bytes).accept(c, ClassReader.EXPAND_FRAMES)
-                    classNodes.put(c.name, c)
-                }
+            if(!entry.name.endsWith(".class")) {
+                files[entry.name] = bytes
+            } else {
+                val c = ClassNode()
+                ClassReader(bytes).accept(c, ClassReader.EXPAND_FRAMES)
+                classNodes[c.name] = c
             }
         }
 
         // open manifest
         manifest = jar.manifest
+    }
+
+    private fun openClass(file: File) {
+        val bytes: ByteArray = Utils.readBytes(file.inputStream())
+        val c = ClassNode()
+        ClassReader(bytes).accept(c, ClassReader.EXPAND_FRAMES)
+        classNodes[c.name] = c
+    }
+
+    private fun saveFile() {
+        when(ioMode) {
+            IOMode.JAR -> saveJar()
+            IOMode.CLASS -> saveClass()
+        }
     }
 
     private fun saveJar() {
@@ -127,8 +147,8 @@ object Nebulous {
         manifest.write(mos)
         files["META-INF/MANIFEST.MF"] = mos.toByteArray()
 
-        var location: String = output.value
-        if (!location.endsWith(".jar")) location += ".jar"
+        var location: String = output.value!!
+        if(!location.endsWith(".jar")) location += ".jar"
 
         val jarPath = Paths.get(location)
         Files.deleteIfExists(jarPath)
@@ -138,12 +158,7 @@ object Nebulous {
         // write classes into jar
         classNodes.values.forEach { cn ->
             outJar.putNextEntry(JarEntry(cn.name + ".class"))
-
-            val writer = ClassWriter(ClassWriter.COMPUTE_MAXS)
-            writer.newUTF8("Secured by Nebulous")
-            cn.accept(writer)
-            outJar.write(writer.toByteArray())
-
+            outJar.write(Utils.writeBytes(cn))
             outJar.closeEntry()
         }
 
@@ -155,6 +170,18 @@ object Nebulous {
         }
 
         outJar.close()
+    }
+
+    private fun saveClass() {
+        var location: String = output.value!!
+        if(!location.endsWith(".class")) location += ".class"
+
+        val classPath = Paths.get(location)
+        Files.deleteIfExists(classPath)
+
+        val outputStream = Files.newOutputStream(classPath, StandardOpenOption.CREATE, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)
+        outputStream.write(Utils.writeBytes(classNodes.entries.iterator().next().value))
+        outputStream.close()
     }
 
     fun getClassNodes(): MutableMap<String, ClassNode> {
@@ -171,13 +198,19 @@ object Nebulous {
 
     fun getExclusions(): List<String> {
         val temp: MutableList<String> = mutableListOf()
-        for (i in 0 until exclusions.value!!.length()) temp.add(exclusions.value!!.getString(i))
+        if(exclusions.value == null) return temp
+        for(i in 0 until exclusions.value!!.length()) temp.add(exclusions.value!!.getString(i))
         return temp
     }
 
     fun getLibraries(): List<String> {
         val temp: MutableList<String> = mutableListOf()
-        for (i in 0 until libraries.value!!.length()) temp.add(libraries.value!!.getString(i))
+        if(libraries.value == null) return temp
+        for(i in 0 until libraries.value!!.length()) temp.add(libraries.value!!.getString(i))
         return temp
+    }
+
+    enum class IOMode {
+        CLASS, JAR;
     }
 }

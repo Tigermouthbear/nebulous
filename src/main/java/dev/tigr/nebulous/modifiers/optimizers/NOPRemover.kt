@@ -7,7 +7,7 @@ import org.objectweb.asm.Opcodes.NOP
  * @author Tigermouthbear
  * Removes all of the unneeded NOP instructions
  */
-object NOPRemover : IModifier {
+object NOPRemover: IModifier {
     override fun modify() {
         classes.stream()
                 .filter { cn -> !isExcluded(cn.name) }

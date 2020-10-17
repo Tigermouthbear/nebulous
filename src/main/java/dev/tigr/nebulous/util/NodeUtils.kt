@@ -11,14 +11,17 @@ import org.objectweb.asm.tree.LdcInsnNode
  * Utils to interface with nodes
  */
 interface NodeUtils {
+    companion object: NodeUtils {
+    }
+
     fun getLdcInt(int: Int): AbstractInsnNode {
-        if (int <= 32767 && int >= -32768) {
+        if(int <= 32767 && int >= -32768) {
             return IntInsnNode(SIPUSH, int)
-        } else if (int <= 127 && int >= -128) {
+        } else if(int <= 127 && int >= -128) {
             return IntInsnNode(BIPUSH, int)
         }
 
-        return when (int) {
+        return when(int) {
             -1 -> InsnNode(ICONST_M1)
             0 -> InsnNode(ICONST_0)
             1 -> InsnNode(ICONST_1)
@@ -31,7 +34,7 @@ interface NodeUtils {
     }
 
     fun getIntFromAin(ain: AbstractInsnNode): Int {
-        return when (ain.opcode) {
+        return when(ain.opcode) {
             ICONST_M1 -> -1
             ICONST_0 -> 0
             ICONST_1 -> 1

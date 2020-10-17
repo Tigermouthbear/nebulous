@@ -23,10 +23,10 @@ object Dictionary {
     private fun genWithDict(dict: String): String {
         val length = RANDOM.nextInt(10 - 5) + 5
         val sb = StringBuilder()
-        for (i in 0 until length) sb.append(dict[RANDOM.nextInt(dict.length)])
+        for(i in 0 until length) sb.append(dict[RANDOM.nextInt(dict.length)])
         //Makes sure that string hasn't been used, if so gens a new one
         var out = sb.toString()
-        if (stringsUsed.contains(sb.toString())) out = genWithDict(dict)
+        if(stringsUsed.contains(sb.toString())) out = genWithDict(dict)
         stringsUsed.add(out)
         return out
     }
@@ -38,13 +38,13 @@ object Dictionary {
     }
 
     fun getInAlphabet(i: Int): String {
-        return if (i < 0) "" else getInAlphabet(i / 26 - 1) + (65 + i % 26).toChar()
+        return if(i < 0) "" else getInAlphabet(i / 26 - 1) + (65 + i % 26).toChar()
     }
 
     fun genRandomString(): String {
         val length = RANDOM.nextInt(15 - 5) + 5
         val sb = StringBuilder()
-        for (i in 0 until length) {
+        for(i in 0 until length) {
             val letter = RANDOM.nextInt(ALPHABET.length)
             sb.append(ALPHABET[letter])
         }

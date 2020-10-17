@@ -8,7 +8,7 @@ import org.objectweb.asm.tree.*
  * @author Tigermouthbear
  * Splits all string ldcs into their given byte arrays
  */
-object StringSplitter : IModifier {
+object StringSplitter: IModifier {
     override fun modify() {
         classes.stream()
                 .filter { cn -> !isExcluded(cn.name) }
@@ -17,7 +17,7 @@ object StringSplitter : IModifier {
                         val strings: MutableList<LdcInsnNode> = mutableListOf()
 
                         mn.instructions.forEach { ain ->
-                            if (ain is LdcInsnNode && ain.cst is String) strings.add(ain)
+                            if(ain is LdcInsnNode && ain.cst is String) strings.add(ain)
                         }
 
                         strings.forEach { ldc ->
@@ -39,7 +39,7 @@ object StringSplitter : IModifier {
             add(IntInsnNode(NEWARRAY, T_BYTE)) // create array
 
             // write each byte of array
-            for ((index, b) in bytes.withIndex()) {
+            for((index, b) in bytes.withIndex()) {
                 add(InsnNode(DUP))
                 add(getLdcInt(index))
                 add(IntInsnNode(BIPUSH, b.toInt()))

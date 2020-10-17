@@ -7,7 +7,7 @@ import org.objectweb.asm.tree.LineNumberNode
  * @author Tigermouthbear
  * Removes all of the unneeded line number instructions
  */
-object LineNumberRemover : IModifier {
+object LineNumberRemover: IModifier {
     override fun modify() {
         classes.stream()
                 .filter { cn -> !isExcluded(cn.name) }

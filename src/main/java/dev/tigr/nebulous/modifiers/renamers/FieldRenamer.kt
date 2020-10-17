@@ -10,7 +10,7 @@ import java.util.*
  * @author Tigermouthbear
  * Renames all fields to use the current dictionary
  */
-object FieldRenamer : IModifier {
+object FieldRenamer: IModifier {
     override fun modify() {
         val remap: MutableMap<String?, String?> = mutableMapOf()
         val fieldMap: MutableMap<FieldNode, ClassNode> = mutableMapOf()
@@ -23,13 +23,13 @@ object FieldRenamer : IModifier {
                 }
 
         // create obfuscated names
-        for ((fn, owner) in fieldMap.entries) {
+        for((fn, owner) in fieldMap.entries) {
             val name = Dictionary.getNewName()
 
             val stack = Stack<ClassNode?>()
             stack.add(owner)
 
-            while (!stack.empty()) {
+            while(!stack.empty()) {
                 val cn = stack.pop()
                 remap[cn!!.name + "." + fn.name] = name
 

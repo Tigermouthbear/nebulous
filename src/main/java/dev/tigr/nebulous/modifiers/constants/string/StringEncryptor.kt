@@ -16,7 +16,7 @@ import java.security.SecureRandom
  * @author Tigermouthbear
  * Encrypts all string ldcs with a custom cipher
  */
-object StringEncryptor : IModifier {
+object StringEncryptor: IModifier {
     private val RANDOM = SecureRandom()
     private val encryptors = arrayOf(PBEStringEncryptor(), BlowfishStringEncryptor(), AESStringEncryptor())
 
@@ -41,7 +41,7 @@ object StringEncryptor : IModifier {
     private fun encrypt(encryptedString: EncryptedString) {
         encryptedString.apply {
             // add decryptor method if its not there already
-            if (cn.methods.stream().filter { mn -> mn.name == encryptor.name }.count() <= 0) {
+            if(cn.methods.stream().filter { mn -> mn.name == encryptor.name }.count() <= 0) {
                 // read encryptors class
                 val classReader = ClassReader(Nebulous::class.java.getResourceAsStream("/" + encryptor.javaClass.name.replace('.', '/') + ".class"))
                 val enc = ClassNode()

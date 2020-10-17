@@ -7,7 +7,7 @@ import org.objectweb.asm.tree.*
 /**
  * @author Tigermouthbear
  */
-object NumberPooler : IModifier {
+object NumberPooler: IModifier {
     private const val arrayName = "numberPoolArray"
 
     override fun modify() {
@@ -19,17 +19,17 @@ object NumberPooler : IModifier {
                     val numberMap: MutableMap<AbstractInsnNode, MethodNode> = mutableMapOf()
                     cn.methods.forEach { mn ->
                         mn.instructions.forEach { ain ->
-                            if ((ain is LdcInsnNode && ain.cst is Int) || (ain.opcode == BIPUSH || ain.opcode == SIPUSH)
+                            if((ain is LdcInsnNode && ain.cst is Int) || (ain.opcode == BIPUSH || ain.opcode == SIPUSH)
                                     || (ain.opcode in ICONST_M1..ICONST_5)) {
                                 numberMap[ain] = mn
                             }
                         }
                     }
 
-                    if (numberMap.isNotEmpty()) {
+                    if(numberMap.isNotEmpty()) {
                         // create array
                         cn.fields.add(FieldNode(
-                                (if (cn.access and ACC_INTERFACE != 0) ACC_PUBLIC else ACC_PRIVATE) or (if (cn.version > V1_8) 0 else ACC_FINAL) or ACC_STATIC,
+                                (if(cn.access and ACC_INTERFACE != 0) ACC_PUBLIC else ACC_PRIVATE) or (if(cn.version > V1_8) 0 else ACC_FINAL) or ACC_STATIC,
                                 arrayName,
                                 "[I",
                                 null,
@@ -37,11 +37,11 @@ object NumberPooler : IModifier {
 
                         // make sure clinit is present in class, if not, create it
                         var clinit = getMethod(cn, "<clinit>")
-                        if (clinit == null) {
+                        if(clinit == null) {
                             clinit = MethodNode(ACC_STATIC, "<clinit>", "()V", null, arrayOf<String>())
                             cn.methods.add(clinit)
                         }
-                        if (clinit.instructions == null) clinit.instructions = InsnList()
+                        if(clinit.instructions == null) clinit.instructions = InsnList()
 
                         // create array with values and
                         val arrayInstructions = InsnList().apply {
@@ -49,7 +49,7 @@ object NumberPooler : IModifier {
                             add(IntInsnNode(NEWARRAY, T_INT)) // create array
 
                             // write each number of array
-                            for ((index, ain) in numberMap.keys.withIndex()) {
+                            for((index, ain) in numberMap.keys.withIndex()) {
                                 // add to array
                                 add(InsnNode(DUP))
                                 add(getLdcInt(index))
@@ -78,7 +78,7 @@ object NumberPooler : IModifier {
                                     "[I"))
                         }
 
-                        if (clinit.instructions == null || clinit.instructions.first == null) {
+                        if(clinit.instructions == null || clinit.instructions.first == null) {
                             clinit.instructions.add(arrayInstructions)
                             clinit.instructions.add(InsnNode(RETURN))
                         } else {

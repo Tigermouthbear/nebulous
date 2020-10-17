@@ -7,7 +7,7 @@ import java.util.*
  * @author Tigermouthbear
  * Shuffles the order of all nodes
  */
-object MemberShuffler : IModifier {
+object MemberShuffler: IModifier {
     override fun modify() {
         classes.stream()
                 .filter { cn -> !isExcluded(cn.name) }
@@ -51,7 +51,7 @@ object MemberShuffler : IModifier {
     }
 
     private fun shuffle(list: List<*>?) {
-        if (list != null) Collections.shuffle(list)
+        if(list != null) Collections.shuffle(list)
     }
 
 

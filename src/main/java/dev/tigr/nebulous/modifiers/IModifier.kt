@@ -12,7 +12,7 @@ import java.util.stream.Collectors
 /**
  * @author Tigermouthbear
  */
-interface IModifier : Utils, NodeUtils {
+interface IModifier: Utils, NodeUtils {
     val classMap: MutableMap<String, ClassNode>
         get() = Nebulous.getClassNodes()
 
@@ -34,7 +34,7 @@ interface IModifier : Utils, NodeUtils {
 
     fun applyRemap(remap: Map<String?, String?>?) {
         val remapper = SimpleRemapper(remap)
-        for (node in classes) {
+        for(node in classes) {
             val copy = ClassNode()
             val adapter = ClassRemapper(copy, remapper)
             node.accept(adapter)

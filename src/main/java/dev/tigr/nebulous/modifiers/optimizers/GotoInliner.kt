@@ -8,7 +8,7 @@ import org.objectweb.asm.tree.JumpInsnNode
  * @author Tigermouthbear
  * Inlines goto-goto instructions by setting the first goto's target to the second goto's target
  */
-object GotoInliner : IModifier {
+object GotoInliner: IModifier {
     override fun modify() {
         classes.stream()
                 .filter { cn -> !isExcluded(cn.name) }
@@ -20,7 +20,7 @@ object GotoInliner : IModifier {
                                     val jump = ain as JumpInsnNode
                                     val target = jump.label.next
 
-                                    if (target != null && target.opcode == GOTO) {
+                                    if(target != null && target.opcode == GOTO) {
                                         jump.label = (target as JumpInsnNode).label
                                     }
                                 }

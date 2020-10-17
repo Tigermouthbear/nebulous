@@ -9,7 +9,7 @@ import org.objectweb.asm.tree.ClassNode
  * @author Tigermouthbear
  * Removes debug info such as sourcefile
  */
-object DebugInfoRemover : IModifier {
+object DebugInfoRemover: IModifier {
     override fun modify() {
         val map: MutableMap<String, ClassNode> = mutableMapOf()
 
