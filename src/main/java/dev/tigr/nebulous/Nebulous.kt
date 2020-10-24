@@ -1,19 +1,11 @@
 package dev.tigr.nebulous
 
-import dev.tigr.nebulous.modifiers.IModifier
-import dev.tigr.nebulous.modifiers.constants.number.NumberPooler
-import dev.tigr.nebulous.modifiers.constants.string.StringPooler
-import dev.tigr.nebulous.modifiers.constants.string.StringSplitter
-import dev.tigr.nebulous.modifiers.misc.DebugInfoRemover
-import dev.tigr.nebulous.modifiers.misc.FullAccessFlags
-import dev.tigr.nebulous.modifiers.misc.MemberShuffler
-import dev.tigr.nebulous.modifiers.optimizers.GotoInliner
-import dev.tigr.nebulous.modifiers.optimizers.GotoReturnInliner
-import dev.tigr.nebulous.modifiers.optimizers.LineNumberRemover
-import dev.tigr.nebulous.modifiers.optimizers.NOPRemover
-import dev.tigr.nebulous.modifiers.renamers.ClassRenamer
-import dev.tigr.nebulous.modifiers.renamers.FieldRenamer
-import dev.tigr.nebulous.modifiers.renamers.MethodRenamer
+import dev.tigr.nebulous.modifiers.AbstractModifier
+import dev.tigr.nebulous.modifiers.constants.number.*
+import dev.tigr.nebulous.modifiers.constants.string.*
+import dev.tigr.nebulous.modifiers.misc.*
+import dev.tigr.nebulous.modifiers.optimizers.*
+import dev.tigr.nebulous.modifiers.renamers.*
 import dev.tigr.nebulous.util.*
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.tree.ClassNode
@@ -27,13 +19,14 @@ import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
+import dev.tigr.nebulous.modifiers.constants.string.StringSplitter as StringSplitter
 
 /**
  * @author Tigermouthbear
  */
 object Nebulous {
-    private val input = StringConfig("input", true)
-    private val output = StringConfig("output", true)
+    private val input = StringConfig("input")
+    private val output = StringConfig("output")
     private val exclusions = ArrayConfig("exclusions")
     private val libraries = ArrayConfig("libraries")
 
@@ -47,8 +40,14 @@ object Nebulous {
 
         Config.read(config)
 
+        // make sure input and output are provided
+        if(input.value == null || output.value == null) {
+            println("Must specify input and output file!")
+            return
+        }
+
         // load jar
-        val fileIn = File(input.value)
+        val fileIn = File(input.value!!)
         if(!fileIn.exists()) {
             println("Input file not found!")
             return
@@ -57,38 +56,33 @@ object Nebulous {
 
         ClassPath.load(getLibraries())
 
-        val modifiers: List<IModifier> =
-                arrayListOf(
-                        // strings
-                        StringPooler,
-                        //StringEncryptor,
-                        StringSplitter,
+        // run all modifiers
+        // config is handled in AbstractModifier
+        arrayListOf(
+                // strings
+                StringPooler,
+                StringEncryptor,
+                StringSplitter,
 
-                        // numbers
-                        NumberPooler,
+                // numbers
+                NumberPooler,
 
-                        // names
-                        //FieldRenamer,
-                        //MethodRenamer,
-                        //ClassRenamer,
+                // names
+                FieldRenamer,
+                MethodRenamer,
+                ClassRenamer,
 
-                        // misc
-                        //MemberShuffler,
-                        //FullAccessFlags,
-                        DebugInfoRemover,
+                // misc
+                MemberShuffler,
+                FullAccessFlags,
+                DebugInfoRemover,
 
-                        // optimizers
-                        NOPRemover,
-                        LineNumberRemover,
-                        GotoInliner,
-                        GotoReturnInliner
-                )
-
-        modifiers.forEach { modifier ->
-            val current = System.currentTimeMillis()
-            modifier.modify()
-            println(modifier.getName() + " completed in " + (System.currentTimeMillis() - current) + " milliseconds")
-        }
+                // optimizers
+                NOPRemover,
+                LineNumberRemover,
+                GotoInliner,
+                GotoReturnInliner
+        ).forEach(AbstractModifier::run)
 
         saveFile()
 
@@ -120,6 +114,7 @@ object Nebulous {
                 val c = ClassNode()
                 ClassReader(bytes).accept(c, ClassReader.EXPAND_FRAMES)
                 classNodes[c.name] = c
+                ClassPath.get(c)
             }
         }
 

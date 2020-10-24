@@ -1,6 +1,6 @@
 package dev.tigr.nebulous.modifiers.optimizers
 
-import dev.tigr.nebulous.modifiers.IModifier
+import dev.tigr.nebulous.modifiers.AbstractModifier
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.InsnNode
 import org.objectweb.asm.tree.JumpInsnNode
@@ -9,7 +9,7 @@ import org.objectweb.asm.tree.JumpInsnNode
  * @author Tigermouthbear
  * Inlines goto-return instructions by setting the goto's jump node to a return
  */
-object GotoReturnInliner: IModifier {
+object GotoReturnInliner: AbstractModifier("GotoReturnInliner") {
     override fun modify() {
         classes.stream()
                 .filter { cn -> !isExcluded(cn.name) }
@@ -27,9 +27,5 @@ object GotoReturnInliner: IModifier {
                                 }
                     }
                 }
-    }
-
-    override fun getName(): String {
-        return "Goto-Return Inliner"
     }
 }

@@ -1,6 +1,8 @@
 package dev.tigr.nebulous.modifiers.renamers
 
-import dev.tigr.nebulous.modifiers.IModifier
+import dev.tigr.nebulous.modifiers.AbstractModifier
+import dev.tigr.nebulous.util.ClassEntry
+import dev.tigr.nebulous.util.ClassNodeEntry
 import dev.tigr.nebulous.util.ClassPath
 import dev.tigr.nebulous.util.Dictionary
 import org.objectweb.asm.Opcodes.*
@@ -12,12 +14,12 @@ import java.util.*
  * @author Tigermouthbear
  * Renames all methods to use the current dictionary
  */
-object MethodRenamer: IModifier {
+object MethodRenamer: AbstractModifier("MethodRenamer") {
     private val blacklist = arrayListOf("main", "createUI")
 
     override fun modify() {
         val remap: MutableMap<String?, String?> = mutableMapOf()
-        val methodMap: MutableMap<MethodNode, ClassNode> = mutableMapOf()
+        val methodMap: MutableMap<MethodNode, ClassEntry> = mutableMapOf()
 
         //TODO: Make this work with acc_annotation acc_enum and acc_abstract
 
@@ -27,29 +29,29 @@ object MethodRenamer: IModifier {
                 .forEach { cn ->
                     cn.methods.stream()
                             .filter { mn -> !blacklist.contains(mn.name) && !mn.name.startsWith("<") && mn.access and ACC_NATIVE == 0 }
-                            .forEach { mn -> methodMap[mn] = cn }
+                            .forEach { mn -> methodMap[mn] = ClassPath.get(cn) }
                 }
 
         // create obfuscated names
         methods@
         for((mn, owner) in methodMap.entries) {
-            val stack = Stack<ClassNode?>()
+            val stack = Stack<ClassEntry>()
             stack.add(owner)
 
             while(stack.isNotEmpty()) {
-                val cn = stack.pop()
+                val ce = stack.pop()
 
                 // if not top level method continue
-                if(cn != owner && cn!!.methods.findLast { method -> method.name == mn.name && method.desc == mn.desc } != null)
+                if(ce != owner && ce.getMethods().findLast { method -> method.name == mn.name && method.desc == mn.desc } != null)
                     continue@methods
 
                 // push super class
-                val parent = getClassNode(cn.superName)
+                val parent = if(ce.getSuper() == null) null else ClassPath[ce.getSuper()]
                 if(parent != null) stack.push(parent)
 
                 // push interfaces that it implements
-                cn.interfaces.forEach { inter ->
-                    val interfNode = getClassNode(inter)
+                ce.getInterfaces().forEach { inter: String ->
+                    val interfNode = ClassPath[inter]
                     if(interfNode != null) stack.push(interfNode)
                 }
             }
@@ -58,25 +60,17 @@ object MethodRenamer: IModifier {
             stack.add(owner)
 
             while(stack.isNotEmpty()) {
-                val cn = stack.pop()
-                remap[cn!!.name + "." + mn.name + mn.desc] = name
+                val ce = stack.pop()
+                remap[ce.getName() + "." + mn.name + mn.desc] = name
 
                 //add classes which implement or extend the class node to the stack so that their fields get remapped
-                stack.addAll(getExtensions(cn))
-                stack.addAll(getImplementations(cn))
+                stack.addAll(getExtensions(ce))
+                stack.addAll(getImplementations(ce))
             }
         }
 
         applyRemap(remap)
-    }
 
-    private fun getClassNode(name: String?): ClassNode? {
-        if(name == null) return null
-        val n = classMap[name]
-        return n ?: ClassPath[name]
-    }
-
-    override fun getName(): String {
-        return "Method Renamer"
+        Dictionary.reset()
     }
 }

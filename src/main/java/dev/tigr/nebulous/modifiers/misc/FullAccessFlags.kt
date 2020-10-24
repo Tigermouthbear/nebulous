@@ -1,13 +1,13 @@
 package dev.tigr.nebulous.modifiers.misc
 
-import dev.tigr.nebulous.modifiers.IModifier
+import dev.tigr.nebulous.modifiers.AbstractModifier
 import org.objectweb.asm.Opcodes.*
 
 /**
  * @author Tigermouthbear
  * Sets all nodes to have full access flags
  */
-object FullAccessFlags: IModifier {
+object FullAccessFlags: AbstractModifier("FullAccessFlags") {
     override fun modify() {
         classes.stream()
                 .filter { cn -> !isExcluded(cn.name) }
@@ -20,6 +20,7 @@ object FullAccessFlags: IModifier {
                 }
     }
 
+    @Suppress("DEPRECATED_IDENTITY_EQUALS")
     private fun access(access: Int): Int {
         var a: Int = ACC_PUBLIC
         if(access and ACC_NATIVE !== 0) a = a or ACC_NATIVE
@@ -43,9 +44,5 @@ object FullAccessFlags: IModifier {
         if(access and ACC_VARARGS !== 0) a = a or ACC_VARARGS
         if(access and ACC_VOLATILE !== 0) a = a or ACC_VOLATILE
         return a
-    }
-
-    override fun getName(): String {
-        return "Full Access Flags"
     }
 }

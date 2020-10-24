@@ -1,6 +1,6 @@
 package dev.tigr.nebulous.modifiers.constants.string
 
-import dev.tigr.nebulous.modifiers.IModifier
+import dev.tigr.nebulous.modifiers.AbstractModifier
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.*
 
@@ -8,7 +8,7 @@ import org.objectweb.asm.tree.*
  * @author Tigermouthbear
  * Splits all string ldcs into their given byte arrays
  */
-object StringSplitter: IModifier {
+object StringSplitter: AbstractModifier("StringSplitter") {
     override fun modify() {
         classes.stream()
                 .filter { cn -> !isExcluded(cn.name) }
@@ -53,9 +53,5 @@ object StringSplitter: IModifier {
                     "([B)V",
                     false))
         }
-    }
-
-    override fun getName(): String {
-        return "String Splitter"
     }
 }

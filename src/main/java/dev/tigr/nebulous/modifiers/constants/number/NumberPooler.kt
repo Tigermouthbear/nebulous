@@ -1,13 +1,13 @@
 package dev.tigr.nebulous.modifiers.constants.number
 
-import dev.tigr.nebulous.modifiers.IModifier
+import dev.tigr.nebulous.modifiers.AbstractModifier
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.*
 
 /**
  * @author Tigermouthbear
  */
-object NumberPooler: IModifier {
+object NumberPooler: AbstractModifier("NumberPooler") {
     private const val arrayName = "numberPoolArray"
 
     override fun modify() {
@@ -86,9 +86,5 @@ object NumberPooler: IModifier {
                         }
                     }
                 }
-    }
-
-    override fun getName(): String {
-        return "Number Pooler"
     }
 }

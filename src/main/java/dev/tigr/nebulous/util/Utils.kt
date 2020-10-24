@@ -12,12 +12,9 @@ import java.io.InputStream
  * General Utils
  */
 interface Utils {
-    companion object: Utils {
-    }
+    companion object: Utils
 
     fun isExcluded(name: String): Boolean {
-        if(name == "me/tigermouthbear/ares/Ares") return true
-
         val path = getPath(name)
         for(exclusion in Nebulous.getExclusions()) {
             if(path.contains(exclusion)) return true

@@ -5,7 +5,7 @@ import dev.tigr.nebulous.encryption.AESStringEncryptor
 import dev.tigr.nebulous.encryption.BlowfishStringEncryptor
 import dev.tigr.nebulous.encryption.IStringEncryptor
 import dev.tigr.nebulous.encryption.PBEStringEncryptor
-import dev.tigr.nebulous.modifiers.IModifier
+import dev.tigr.nebulous.modifiers.AbstractModifier
 import dev.tigr.nebulous.util.Dictionary
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Opcodes.*
@@ -16,7 +16,7 @@ import java.security.SecureRandom
  * @author Tigermouthbear
  * Encrypts all string ldcs with a custom cipher
  */
-object StringEncryptor: IModifier {
+object StringEncryptor: AbstractModifier("StringEncryptor") {
     private val RANDOM = SecureRandom()
     private val encryptors = arrayOf(PBEStringEncryptor(), BlowfishStringEncryptor(), AESStringEncryptor())
 
@@ -82,8 +82,4 @@ object StringEncryptor: IModifier {
     }
 
     class EncryptedString(val cn: ClassNode, val mn: MethodNode, val ldc: LdcInsnNode, val encryptor: IStringEncryptor, val key: String)
-
-    override fun getName(): String {
-        return "String Encryptor"
-    }
 }

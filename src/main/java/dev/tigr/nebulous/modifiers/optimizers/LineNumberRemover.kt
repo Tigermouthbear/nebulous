@@ -1,13 +1,13 @@
 package dev.tigr.nebulous.modifiers.optimizers
 
-import dev.tigr.nebulous.modifiers.IModifier
+import dev.tigr.nebulous.modifiers.AbstractModifier
 import org.objectweb.asm.tree.LineNumberNode
 
 /**
  * @author Tigermouthbear
  * Removes all of the unneeded line number instructions
  */
-object LineNumberRemover: IModifier {
+object LineNumberRemover: AbstractModifier("LineNumberRemover") {
     override fun modify() {
         classes.stream()
                 .filter { cn -> !isExcluded(cn.name) }
@@ -16,9 +16,5 @@ object LineNumberRemover: IModifier {
                         mn.instructions.removeAll { ain -> ain is LineNumberNode }
                     }
                 }
-    }
-
-    override fun getName(): String {
-        return "Line Number Remover"
     }
 }

@@ -1,6 +1,6 @@
 package dev.tigr.nebulous.modifiers.optimizers
 
-import dev.tigr.nebulous.modifiers.IModifier
+import dev.tigr.nebulous.modifiers.AbstractModifier
 import org.objectweb.asm.Opcodes.GOTO
 import org.objectweb.asm.tree.JumpInsnNode
 
@@ -8,7 +8,7 @@ import org.objectweb.asm.tree.JumpInsnNode
  * @author Tigermouthbear
  * Inlines goto-goto instructions by setting the first goto's target to the second goto's target
  */
-object GotoInliner: IModifier {
+object GotoInliner: AbstractModifier("GotoInliner") {
     override fun modify() {
         classes.stream()
                 .filter { cn -> !isExcluded(cn.name) }
@@ -26,9 +26,5 @@ object GotoInliner: IModifier {
                                 }
                     }
                 }
-    }
-
-    override fun getName(): String {
-        return "Goto Inliner"
     }
 }

@@ -1,8 +1,7 @@
 package dev.tigr.nebulous.modifiers
 
 import dev.tigr.nebulous.Nebulous
-import dev.tigr.nebulous.util.NodeUtils
-import dev.tigr.nebulous.util.Utils
+import dev.tigr.nebulous.util.*
 import org.objectweb.asm.commons.ClassRemapper
 import org.objectweb.asm.commons.SimpleRemapper
 import org.objectweb.asm.tree.ClassNode
@@ -12,7 +11,9 @@ import java.util.stream.Collectors
 /**
  * @author Tigermouthbear
  */
-interface IModifier: Utils, NodeUtils {
+abstract class AbstractModifier(val name: String): Utils, NodeUtils {
+    private val setting = BooleanConfig(name)
+
     val classMap: MutableMap<String, ClassNode>
         get() = Nebulous.getClassNodes()
 
@@ -28,9 +29,15 @@ interface IModifier: Utils, NodeUtils {
     val manifest: Manifest
         get() = Nebulous.getManifest()
 
-    fun modify()
+    fun run() {
+        if(setting.value != null && setting.value!!) {
+            val current = System.currentTimeMillis()
+            modify()
+            println(name + " completed in " + (System.currentTimeMillis() - current) + " milliseconds")
+        }
+    }
 
-    fun getName(): String
+    protected abstract fun modify()
 
     fun applyRemap(remap: Map<String?, String?>?) {
         val remapper = SimpleRemapper(remap)
@@ -57,6 +64,26 @@ interface IModifier: Utils, NodeUtils {
                     extensions.addAll(getExtensions(cn))
                 }
 
+        return extensions
+    }
+
+    fun getImplementations(target: ClassEntry): List<ClassEntry> {
+        val implementations = mutableListOf<ClassEntry>()
+        for(cn in classes.stream().filter { cn -> cn.interfaces.contains(target.getName()) }) {
+            implementations.add(ClassPath.get(cn))
+            implementations.addAll(getImplementations(ClassPath.get(cn)))
+        }
+        return implementations
+    }
+
+    fun getExtensions(target: ClassEntry): List<ClassEntry> {
+        val extensions = mutableListOf<ClassEntry>()
+        classes.stream()
+                .filter { cn -> cn.superName == target.getName() }
+                .forEach { cn ->
+                    extensions.add(ClassPath.get(cn))
+                    extensions.addAll(getExtensions(ClassPath.get(cn)))
+        }
         return extensions
     }
 }

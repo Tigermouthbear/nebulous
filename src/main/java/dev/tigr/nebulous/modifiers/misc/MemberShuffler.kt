@@ -1,13 +1,13 @@
 package dev.tigr.nebulous.modifiers.misc
 
-import dev.tigr.nebulous.modifiers.IModifier
+import dev.tigr.nebulous.modifiers.AbstractModifier
 import java.util.*
 
 /**
  * @author Tigermouthbear
  * Shuffles the order of all nodes
  */
-object MemberShuffler: IModifier {
+object MemberShuffler: AbstractModifier("MemberShuffler") {
     override fun modify() {
         classes.stream()
                 .filter { cn -> !isExcluded(cn.name) }
@@ -52,10 +52,5 @@ object MemberShuffler: IModifier {
 
     private fun shuffle(list: List<*>?) {
         if(list != null) Collections.shuffle(list)
-    }
-
-
-    override fun getName(): String {
-        return "Member Shuffler"
     }
 }

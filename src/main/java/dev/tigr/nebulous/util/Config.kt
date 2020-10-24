@@ -11,42 +11,44 @@ import java.util.*
 /**
  * @author Tigermouthbear
  */
-open class Config<T>(private val name: String, private val type: Type, private val read: (JSONObject) -> T, private val mandatory: Boolean) {
+open class Config<T>(private val name: String, private val type: Type, private val read: (JSONObject) -> T) {
     var value: T? = null
 
     companion object {
-        private val configs: MutableList<Config<*>> = ArrayList()
+        private lateinit var READ_OBJECT: JSONObject
+        private val TO_READ: ArrayList<Config<*>> = arrayListOf()
+        private val IS_INITIALIZED: Boolean
+            get() = ::READ_OBJECT.isInitialized
 
         fun read(file: File?) {
-            val jsonObject = JSONObject(JSONTokener(FileInputStream(file)))
-            configs.forEach {
-                try {
-                    it.read(jsonObject)
-                } catch(e: JSONException) {
-                    if(it.mandatory) e.printStackTrace()
-                }
-            }
+            READ_OBJECT = JSONObject(JSONTokener(FileInputStream(file)))
+            TO_READ.forEach { it.read(READ_OBJECT) }
         }
     }
 
     init {
-        configs.add(this)
+        if(IS_INITIALIZED) read(READ_OBJECT)
+        else TO_READ.add(this)
     }
 
     private fun read(jsonObject: JSONObject) {
-        value = read.invoke(jsonObject)
+        value = if(jsonObject.has(name)) read.invoke(jsonObject) else null
     }
 
     enum class Type {
-        ARRAY, STRING
+        ARRAY, STRING, BOOLEAN
     }
 }
 
-class ArrayConfig(name: String?, mandatory: Boolean = false): Config<JSONArray?>(name!!,Type.ARRAY, {
+class ArrayConfig(name: String?): Config<JSONArray?>(name!!,Type.ARRAY, {
     it.getJSONArray(name)
-}, mandatory)
+})
 
-class StringConfig(name: String?, mandatory: Boolean = false): Config<String?>(name!!, Type.STRING, {
+class StringConfig(name: String?): Config<String?>(name!!, Type.STRING, {
     it.getString(name)
-}, mandatory)
+})
+
+class BooleanConfig(name: String?): Config<Boolean?>(name!!, Type.BOOLEAN, {
+    it.getBoolean(name)
+})
 

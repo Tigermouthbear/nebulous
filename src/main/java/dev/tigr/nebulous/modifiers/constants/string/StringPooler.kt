@@ -1,6 +1,6 @@
 package dev.tigr.nebulous.modifiers.constants.string
 
-import dev.tigr.nebulous.modifiers.IModifier
+import dev.tigr.nebulous.modifiers.AbstractModifier
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.*
 
@@ -8,7 +8,7 @@ import org.objectweb.asm.tree.*
  * @author Tigermouthbear
  * Moves all string ldcs to a single array in a given class
  */
-object StringPooler: IModifier {
+object StringPooler: AbstractModifier("StringPooler") {
     private const val arrayName = "stringPoolArray"
 
     override fun modify() {
@@ -84,9 +84,5 @@ object StringPooler: IModifier {
                         }
                     }
                 }
-    }
-
-    override fun getName(): String {
-        return "String Pooler"
     }
 }

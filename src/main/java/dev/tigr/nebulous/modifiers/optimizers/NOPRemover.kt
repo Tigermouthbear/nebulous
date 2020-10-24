@@ -1,13 +1,13 @@
 package dev.tigr.nebulous.modifiers.optimizers
 
-import dev.tigr.nebulous.modifiers.IModifier
+import dev.tigr.nebulous.modifiers.AbstractModifier
 import org.objectweb.asm.Opcodes.NOP
 
 /**
  * @author Tigermouthbear
  * Removes all of the unneeded NOP instructions
  */
-object NOPRemover: IModifier {
+object NOPRemover: AbstractModifier("NOPRemover") {
     override fun modify() {
         classes.stream()
                 .filter { cn -> !isExcluded(cn.name) }
@@ -16,9 +16,5 @@ object NOPRemover: IModifier {
                         mn.instructions.removeAll { ain -> ain.opcode == NOP }
                     }
                 }
-    }
-
-    override fun getName(): String {
-        return "NOP Remover"
     }
 }

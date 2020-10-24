@@ -1,6 +1,6 @@
 package dev.tigr.nebulous.modifiers.misc
 
-import dev.tigr.nebulous.modifiers.IModifier
+import dev.tigr.nebulous.modifiers.AbstractModifier
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
@@ -9,7 +9,7 @@ import org.objectweb.asm.tree.ClassNode
  * @author Tigermouthbear
  * Removes debug info such as sourcefile
  */
-object DebugInfoRemover: IModifier {
+object DebugInfoRemover: AbstractModifier("DebugInfoRemover") {
     override fun modify() {
         val map: MutableMap<String, ClassNode> = mutableMapOf()
 
@@ -29,10 +29,5 @@ object DebugInfoRemover: IModifier {
 
         classMap.clear()
         classMap.putAll(map)
-    }
-
-
-    override fun getName(): String {
-        return "Debug Info Remover"
     }
 }
